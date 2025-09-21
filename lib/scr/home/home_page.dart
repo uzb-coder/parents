@@ -1,38 +1,38 @@
 import '../../library/librarys.dart';
 
-
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    drawer: ProfileDrawer(),
-    backgroundColor: Colors.grey[200],
-    appBar: AppBarWidget(context, title: "Asosiy"),
-    body: SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildProfileHeader(),
-          const SizedBox(height: 20),
-          _buildProgressCard(),
-          const SizedBox(height: 20),
-          _buildSectionTitle("So'nggi baholar", "Barchasi >"),
-          const SizedBox(height: 10),
-          _buildLatestGradeCard(),
-          const SizedBox(height: 20),
-          _buildComingSoonBanner(),
-          const SizedBox(height: 20),
-          _buildQuarterlyGrades(),
-          const SizedBox(height: 20),
-          _buildMonthlyGradesChart(),
-        ],
+  Widget build(BuildContext context) {
+    return Scaffold(
+      drawer: ProfileDrawer(),
+      backgroundColor: Colors.grey[200],
+      appBar: AppBarWidget(context, title: "Asosiy"),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildProfileHeader(),
+            const SizedBox(height: 20),
+            _buildProgressCard(),
+            const SizedBox(height: 20),
+            _buildSectionTitle("So'nggi baholar", "Barchasi >"),
+            const SizedBox(height: 10),
+            _buildLatestGradeCard(),
+            const SizedBox(height: 20),
+            _buildComingSoonBanner(),
+            const SizedBox(height: 20),
+            _buildQuarterlyGrades(),
+            const SizedBox(height: 20),
+            _buildMonthlyGradesChart(),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
+
   // Profil qismi uchun widget
   Widget _buildProfileHeader() {
     return Row(
@@ -42,7 +42,11 @@ Widget build(BuildContext context) {
           backgroundColor: Colors.deepPurpleAccent,
           child: Text(
             'KS',
-            style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         const SizedBox(width: 15),
@@ -50,7 +54,7 @@ Widget build(BuildContext context) {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Kamola Sobirova',
+              '',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
@@ -60,7 +64,11 @@ Widget build(BuildContext context) {
                   'Uyga vazifa',
                   style: TextStyle(color: Colors.grey[600], fontSize: 14),
                 ),
-                Icon(Icons.arrow_forward_ios, size: 12, color: Colors.grey[600]),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 12,
+                  color: Colors.grey[600],
+                ),
               ],
             ),
           ],
@@ -91,9 +99,10 @@ Widget build(BuildContext context) {
               Text(
                 "Umumiy o'zlashtirish",
                 style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold),
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -104,7 +113,11 @@ Widget build(BuildContext context) {
             percent: 0.18,
             center: const Text(
               "18.0%",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0, color: Colors.white),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16.0,
+                color: Colors.white,
+              ),
             ),
             circularStrokeCap: CircularStrokeCap.round,
             progressColor: Colors.lightGreenAccent,
@@ -159,7 +172,10 @@ Widget build(BuildContext context) {
             child: const Text(
               '3',
               style: TextStyle(
-                  color: Colors.red, fontSize: 24, fontWeight: FontWeight.bold),
+                color: Colors.red,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           const SizedBox(width: 15),
@@ -190,6 +206,7 @@ Widget build(BuildContext context) {
   // "Tez kunda" banneri
   Widget _buildComingSoonBanner() {
     return Container(
+      width: 500,
       height: 80,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
@@ -208,13 +225,14 @@ Widget build(BuildContext context) {
             child: Text(
               '123000',
               style: TextStyle(
-                color: Colors.white24,
+                color: Colors.white,
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
           Container(
+            margin: EdgeInsets.only(left: 250),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               color: Colors.amber,
@@ -266,10 +284,7 @@ Widget build(BuildContext context) {
   Widget _buildGradeItem(String title, String grade) {
     return Column(
       children: [
-        Text(
-          title,
-          style: TextStyle(color: Colors.grey[600], fontSize: 14),
-        ),
+        Text(title, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
         const SizedBox(height: 8),
         Text(
           grade,
@@ -331,7 +346,7 @@ Widget build(BuildContext context) {
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -345,10 +360,7 @@ Widget build(BuildContext context) {
       unselectedItemColor: Colors.grey,
       showUnselectedLabels: true,
       items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Asosiy',
-        ),
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Asosiy'),
         BottomNavigationBarItem(
           icon: Icon(Icons.calendar_today),
           label: 'Dars jadvali',
@@ -361,4 +373,3 @@ Widget build(BuildContext context) {
     );
   }
 }
-

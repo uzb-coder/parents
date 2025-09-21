@@ -37,6 +37,9 @@ dependencies:
   go_router: ^16.2.1
   percent_indicator: ^4.2.5
   intl: ^0.20.2
+  shared_preferences: ^2.5.3
+  dio: ^5.9.0
+  animations: ^2.0.11
 
 dev_dependencies:
   flutter_test:

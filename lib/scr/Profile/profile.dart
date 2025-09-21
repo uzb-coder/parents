@@ -74,11 +74,6 @@ class ProfilePage extends StatelessWidget {
             _buildMenuGroup(
               children: [
                 _buildMenuItem(
-                  "Filial",
-                  trailing: "Intelekt",
-                  icon: Icons.apartment,
-                ),
-                _buildMenuItem(
                   "O'quv yili",
                   trailing: "2025-2026",
                   icon: Icons.calendar_month,
@@ -104,10 +99,6 @@ class ProfilePage extends StatelessWidget {
                 _buildMenuItem(
                   "Kirish-chiqish tarixi",
                   icon: Icons.fingerprint,
-                ),
-                _buildMenuItem(
-                  "Taklif va shikoyat",
-                  icon: Icons.add_comment_outlined,
                 ),
                 _buildMenuItem("Ulashish", icon: Icons.share),
                 _buildMenuItem(
