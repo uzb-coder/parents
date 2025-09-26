@@ -1,4 +1,4 @@
-import '../../library/librarys.dart';
+import 'package:parents/library/librarys.dart';
 
 class LessonDetailPage extends StatelessWidget {
   final String title;

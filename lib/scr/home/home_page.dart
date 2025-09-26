@@ -1,10 +1,51 @@
-import '../../library/librarys.dart';
+import 'package:parents/library/librarys.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  Parents? parents;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadParentsData();
+  }
+  Future<void> _loadParentsData() async {
+    try {
+      final savedParents = await LoginService.getSavedParents();
+      setState(() {
+        parents = savedParents;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print("Ma'lumot yuklashda xato: $e");
+    }
+  }
+  @override
   Widget build(BuildContext context) {
+
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (parents == null) {
+      return const Center(child: Text("Ma'lumot topilmadi"));
+    }
+
+    final guardian = parents!.guardian;
+    final firstChild =  parents!.children.isNotEmpty ? parents!.children[0] : null;
+
+
     return Scaffold(
       drawer: ProfileDrawer(),
       backgroundColor: Colors.grey[200],
@@ -14,7 +55,7 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildProfileHeader(),
+            _buildProfileHeader(firstChild?.fullName ?? ''),
             const SizedBox(height: 20),
             _buildProgressCard(),
             const SizedBox(height: 20),
@@ -33,16 +74,24 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // Profil qismi uchun widget
-  Widget _buildProfileHeader() {
+  Widget _buildProfileHeader(String fullName) {
+    // fullName bosh harflarini olish
+    String initials = '';
+    if (fullName.isNotEmpty) {
+      final parts = fullName.split(' ');
+      if (parts.isNotEmpty) {
+        initials = parts.map((p) => p.isNotEmpty ? p[0].toUpperCase() : '').join();
+      }
+    }
+
     return Row(
       children: [
-        const CircleAvatar(
+        CircleAvatar(
           radius: 30,
           backgroundColor: Colors.deepPurpleAccent,
           child: Text(
-            'KS',
-            style: TextStyle(
+            initials,
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -53,9 +102,9 @@ class HomeScreen extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              fullName,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Row(

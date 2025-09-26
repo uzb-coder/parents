@@ -1,4 +1,4 @@
-import '../../library/librarys.dart';
+import 'package:parents/library/librarys.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -25,7 +25,6 @@ class _MainScreenState extends State<MainScreen> {
         duration: const Duration(milliseconds: 400),
         transitionBuilder: (child, animation, secondaryAnimation) {
           return FadeThroughTransition(
-            // 🔥 smooth fade + scale animatsiya
             animation: animation,
             secondaryAnimation: secondaryAnimation,
             child: child,

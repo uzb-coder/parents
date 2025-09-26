@@ -1,33 +1,28 @@
-import '../../library/librarys.dart';
+import 'package:parents/library/librarys.dart';
 
 class LoginService {
-
-  static const String _baseUrl = ApiGlobal.baseUrl;
-
   static final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: _baseUrl,
+      baseUrl: ApiGlobal.baseUrl,
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
     ),
   );
 
-  //Login qilish
+  // Login qilish
   static Future<Parents?> loginUser(String phone) async {
     try {
       final response = await _dio.post(
-        "$_baseUrl/parents/login",
+        "${Apiendpoints.login}",
         data: {"guardianPhoneNumber": phone},
       );
-
       if (response.statusCode == 200 && response.data['token'] != null) {
-        // Tokenni saqlaymiz
-        await _saveToken(response.data['token']);
 
-        // Student obyektini qaytaramiz (saqlamaymiz)
-        if (response.data['student'] != null) {
-          return Parents.fromJson(response.data);
-        }
+        Parents parents = Parents.fromJson(response.data);
+        await _saveToken(parents.token);
+        await _saveParents(parents);
+
+        return parents;
       }
 
       if (response.statusCode == 401) {
@@ -41,7 +36,25 @@ class LoginService {
     }
   }
 
-  //Token saqlash
+  // Authorized POST
+  static Future<Response?> post(
+    String path, {
+    Map<String, dynamic>? data,
+  }) async {
+    try {
+      final token = await getToken();
+      return await _dio.post(
+        path,
+        data: data,
+        options: Options(headers: {"Authorization": "Bearer $token"}),
+      );
+    } catch (e) {
+      print("POST xatosi: $e");
+      return null;
+    }
+  }
+
+  // Token saqlash
   static Future<void> _saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('auth_token', token);
@@ -53,10 +66,11 @@ class LoginService {
     return prefs.getString('auth_token');
   }
 
-  //Tokenni tozalash
+  // Tokenni tozalash
   static Future<void> clearToken() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('auth_token');
+    await prefs.remove('parents_data'); // Parents ma'lumotini ham tozalaymiz
   }
 
   // Login qilinganmi?
@@ -64,17 +78,24 @@ class LoginService {
     return (await getToken()) != null;
   }
 
-  //Authorized POST
-  static Future<Response?> post(String path) async {
-    try {
-      final token = await getToken();
-      return await _dio.post(
-        path,
-        options: Options(headers: {"Authorization": "Bearer $token"}),
-      );
-    } catch (e) {
-      print("POST xatosi: $e");
-      return null;
+  // Parents ma'lumotini saqlash
+  static Future<void> _saveParents(Parents parents) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('parents_data', jsonEncode(parents.toJson()));
+  }
+
+  // Saqlangan Parents ma'lumotini olish
+  static Future<Parents?> getSavedParents() async {
+    final prefs = await SharedPreferences.getInstance();
+    final data = prefs.getString('parents_data');
+    if (data != null) {
+      return Parents.fromJson(jsonDecode(data));
     }
+    return null;
+  }
+
+  // Logout qilish
+  static Future<void> logout() async {
+    await clearToken();
   }
 }

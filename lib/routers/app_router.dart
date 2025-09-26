@@ -1,4 +1,4 @@
-import '../../library/librarys.dart';
+import 'package:parents/library/librarys.dart';
 
 class AppRoutes {
   static const String login = '/login';
@@ -7,6 +7,7 @@ class AppRoutes {
   static const String grade = '/grades';
   static const String daily = '/daily';
   static const String splash = '/splash';
+  static const String profil = '/profile';
 }
 
 class AppRouter {
@@ -16,6 +17,7 @@ class AppRouter {
     AppRoutes.payemnts: (context) => Payments(),
     AppRoutes.grade: (context) => Grade(),
     AppRoutes.daily: (context) => DailyPage(),
-    AppRoutes.splash: (context) => SplashPage()
+    AppRoutes.splash: (context) => SplashPage(),
+    AppRoutes.profil: (context) => ProfilePage(),
   };
 }

@@ -4,7 +4,10 @@ export 'package:flutter/services.dart';
 export 'dart:async';
 export 'package:dio/dio.dart';
 export 'package:shared_preferences/shared_preferences.dart';
-export 'package:animations/animations.dart'; // 🔥 Animatsiyalar uchun
+export 'package:animations/animations.dart';
+export 'package:parents/scr/login/auth_provider.dart';
+export 'package:provider/provider.dart';
+export  'dart:convert';
 
 
 // Navigatsiya va marshrutlar
@@ -27,6 +30,7 @@ export 'package:parents/scr/login/splash_scr.dart';
 export 'package:parents/global/api_global.dart';
 export 'package:parents/model/loginModel.dart';
 export 'package:parents/scr/login/login_service.dart';
+
 
 // Maxsus Widgetlar
 export 'package:parents/Widgets/widgets.dart';

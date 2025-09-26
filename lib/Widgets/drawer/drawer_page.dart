@@ -1,8 +1,36 @@
-import '../../library/librarys.dart';
+import 'package:parents/library/librarys.dart';
 
-// Asosiy Drawer vidjeti
-class ProfileDrawer extends StatelessWidget {
+class ProfileDrawer extends StatefulWidget {
   const ProfileDrawer({super.key});
+
+  @override
+  State<ProfileDrawer> createState() => _ProfileDrawerState();
+}
+
+class _ProfileDrawerState extends State<ProfileDrawer> {
+  Parents? parents;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadParentsData();
+  }
+
+  Future<void> _loadParentsData() async {
+    try {
+      final savedParents = await LoginService.getSavedParents();
+      setState(() {
+        parents = savedParents;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print("Ma'lumot yuklashda xato: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,16 +40,23 @@ class ProfileDrawer extends StatelessWidget {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-
             _buildDrawerHeader(),
-
             const SizedBox(height: 20),
             _buildMenuGroup(
               context,
               children: [
+                const SizedBox(height: 10),
+
                 _buildMenuGroup(
                   context,
                   children: [
+                    _buildMenuItem(
+                      icon: Icons.home,
+                      title: 'Asosiy',
+                      onTap: () {
+                        Navigator.pushNamed(context, '/home');
+                      },
+                    ),
                     _buildMenuItem(
                       icon: Icons.menu_book,
                       title: 'Jurnal',
@@ -32,11 +67,6 @@ class ProfileDrawer extends StatelessWidget {
                     _buildMenuItem(
                       icon: Icons.comment_outlined,
                       title: 'Izohlar',
-                      onTap: () {},
-                    ),
-                    _buildMenuItem(
-                      icon: Icons.edit_calendar,
-                      title: "O'qituvchini band qilish",
                       onTap: () {},
                     ),
                     _buildMenuItem(
@@ -52,6 +82,11 @@ class ProfileDrawer extends StatelessWidget {
                       onTap: () {
                         Navigator.pushNamed(context, '/payments');
                       },
+                    ),
+                    _buildMenuItem(
+                      icon: Icons.logout,
+                      title: "Chiqish",
+                      onTap: () async {},
                     ),
                   ],
                 ),
@@ -82,59 +117,137 @@ class ProfileDrawer extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Avatar
-              const CircleAvatar(
+              // Avatar - real ma'lumot asosida
+              CircleAvatar(
                 radius: 28,
-                backgroundColor: Colors.black,
-                child: Text(
-                  "F",
-                  style: TextStyle(
-                    fontSize: 22,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                backgroundColor: Colors.blue,
+                child:
+                    isLoading
+                        ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                        : Text(
+                          parents?.guardian.name.isNotEmpty == true
+                              ? parents!.guardian.name[0].toUpperCase()
+                              : "?",
+                          style: const TextStyle(
+                            fontSize: 22,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
               ),
               const SizedBox(width: 12),
 
-              // Familiya + ism va telefon
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    'Foziljon',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  Text(
-                    'Jaloliddinov',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Icon(Icons.phone, size: 16, color: Colors.green),
-                      SizedBox(width: 4),
-                      Text(
-                        '+998941739977',
-                        style: TextStyle(fontSize: 14, color: Colors.black54),
+              // Ism va telefon - real ma'lumotlar
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (isLoading)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            height: 16,
+                            width: 100,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            height: 16,
+                            width: 80,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                        ],
+                      )
+                    else if (parents != null) ...[
+                      ...parents!.guardian.name
+                          .split(' ')
+                          .take(2)
+                          .map(
+                            (name) => Text(
+                              name,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.phone,
+                            size: 16,
+                            color: Colors.green,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              parents!.guardian.phoneNumber,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.black54,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ] else ...[
+                      const Text(
+                        'Ma\'lumot',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const Text(
+                        'topilmadi',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      const Row(
+                        children: [
+                          Icon(Icons.phone, size: 16, color: Colors.grey),
+                          SizedBox(width: 4),
+                          Text(
+                            'Telefon yo\'q',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
 
           const SizedBox(height: 16),
 
+          // Balans (static - API dan kelmayotgani uchun)
           Align(
             alignment: Alignment.centerRight,
             child: Container(
@@ -158,7 +271,6 @@ class ProfileDrawer extends StatelessWidget {
     );
   }
 
-  // 🔹 Menyu guruhini yasash
   Widget _buildMenuGroup(
     BuildContext context, {
     required List<Widget> children,
@@ -175,15 +287,24 @@ class ProfileDrawer extends StatelessWidget {
   }
 
   // 🔹 Har bir menyu elementi
-  // 🔹 Har bir menyu elementi
   Widget _buildMenuItem({
     required IconData icon,
     required String title,
     required VoidCallback onTap,
   }) {
     return ListTile(
-      leading: Icon(icon, color: Colors.blue, size: 22),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
+      leading: Icon(
+        icon,
+        color: title == "Chiqish" ? Colors.red : Colors.blue,
+        size: 22,
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontWeight: FontWeight.w500,
+          color: title == "Chiqish" ? Colors.red : null,
+        ),
+      ),
       trailing: const Icon(
         Icons.arrow_forward_ios,
         size: 16,

@@ -69,7 +69,6 @@ class _LoginPageState extends State<LoginPage> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
                       const SizedBox(height: 40),
-
                       // 🔹 Logo
                       Center(
                         child: Image.asset(
@@ -124,7 +123,6 @@ class _LoginPageState extends State<LoginPage> {
                           style: const TextStyle(color: Colors.red),
                         ),
                       ],
-
                       const SizedBox(height: 40),
                     ],
                   ),

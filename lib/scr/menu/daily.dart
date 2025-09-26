@@ -1,4 +1,4 @@
-import '../../library/librarys.dart';
+import 'package:parents/library/librarys.dart';
 import 'package:intl/intl.dart';
 
 class DailyPage extends StatefulWidget {

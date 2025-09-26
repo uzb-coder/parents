@@ -1,4 +1,4 @@
-import '../../library/librarys.dart';
+import 'package:parents/library/librarys.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -8,10 +8,10 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
+
   Future<void> _checkLoginStatus() async {
-    await Future.delayed(
-      const Duration(seconds: 2),
-    ); // Logo ko‘rinib turishi uchun
+    LoginService.clearToken();
+    await Future.delayed(const Duration(seconds: 2));
 
     bool isLoggedIn = await LoginService.isLoggedIn();
 
