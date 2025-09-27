@@ -1,7 +1,6 @@
 import 'package:parents/library/librarys.dart';
 
 class HomeScreen extends StatefulWidget {
-
   const HomeScreen({super.key});
 
   @override
@@ -17,6 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _loadParentsData();
   }
+
   Future<void> _loadParentsData() async {
     try {
       final savedParents = await LoginService.getSavedParents();
@@ -31,9 +31,9 @@ class _HomeScreenState extends State<HomeScreen> {
       print("Ma'lumot yuklashda xato: $e");
     }
   }
+
   @override
   Widget build(BuildContext context) {
-
     if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -43,8 +43,8 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final guardian = parents!.guardian;
-    final firstChild =  parents!.children.isNotEmpty ? parents!.children[0] : null;
-
+    final firstChild =
+        parents!.children.isNotEmpty ? parents!.children[0] : null;
 
     return Scaffold(
       drawer: ProfileDrawer(),
@@ -59,11 +59,10 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 20),
             _buildProgressCard(),
             const SizedBox(height: 20),
-            _buildSectionTitle("So'nggi baholar", "Barchasi >"),
+            _buildSectionTitle("So'nggi baholar", "Barchasi"),
             const SizedBox(height: 10),
             _buildLatestGradeCard(),
-            const SizedBox(height: 20),
-            _buildComingSoonBanner(),
+            //   _buildComingSoonBanner(),
             const SizedBox(height: 20),
             _buildQuarterlyGrades(),
             const SizedBox(height: 20),
@@ -80,7 +79,8 @@ class _HomeScreenState extends State<HomeScreen> {
     if (fullName.isNotEmpty) {
       final parts = fullName.split(' ');
       if (parts.isNotEmpty) {
-        initials = parts.map((p) => p.isNotEmpty ? p[0].toUpperCase() : '').join();
+        initials =
+            parts.map((p) => p.isNotEmpty ? p[0].toUpperCase() : '').join();
       }
     }
 
@@ -253,52 +253,52 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // "Tez kunda" banneri
-  Widget _buildComingSoonBanner() {
-    return Container(
-      width: 500,
-      height: 80,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
-        gradient: const LinearGradient(
-          colors: [Colors.orangeAccent, Colors.deepOrangeAccent],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Orqa fondagi raqamlar va matnlar (effekt uchun)
-          const Positioned(
-            left: 20,
-            child: Text(
-              '123000',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.only(left: 250),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.amber,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Text(
-              'Tez kunda',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildComingSoonBanner() {
+  //   return Container(
+  //     width: 500,
+  //     height: 80,
+  //     decoration: BoxDecoration(
+  //       borderRadius: BorderRadius.circular(15),
+  //       gradient: const LinearGradient(
+  //         colors: [Colors.orangeAccent, Colors.deepOrangeAccent],
+  //         begin: Alignment.topLeft,
+  //         end: Alignment.bottomRight,
+  //       ),
+  //     ),
+  //     child: Stack(
+  //       alignment: Alignment.center,
+  //       children: [
+  //         // Orqa fondagi raqamlar va matnlar (effekt uchun)
+  //         const Positioned(
+  //           left: 20,
+  //           child: Text(
+  //             '123000',
+  //             style: TextStyle(
+  //               color: Colors.white,
+  //               fontSize: 28,
+  //               fontWeight: FontWeight.bold,
+  //             ),
+  //           ),
+  //         ),
+  //         // Container(
+  //         //   margin: EdgeInsets.only(left: 250),
+  //         //   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+  //         //   decoration: BoxDecoration(
+  //         //     color: Colors.amber,
+  //         //     borderRadius: BorderRadius.circular(20),
+  //         //   ),
+  //         //   child: const Text(
+  //         //     'Tez kunda',
+  //         //     style: TextStyle(
+  //         //       color: Colors.white,
+  //         //       fontWeight: FontWeight.bold,
+  //         //     ),
+  //         //   ),
+  //         // ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   // Chorak baholari uchun widget
   Widget _buildQuarterlyGrades() {
@@ -364,7 +364,6 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                // Y-o'qi (baho qiymatlari)
                 Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -374,7 +373,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
                 const SizedBox(width: 5),
-                // Grafikning o'zi (hozircha bo'sh)
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
@@ -383,8 +381,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         bottom: BorderSide(color: Colors.grey.shade300),
                       ),
                     ),
-                    // Bu yerga `fl_chart` kabi kutubxonadan foydalanib
-                    // haqiqiy grafik chizishingiz mumkin.
                     child: const Center(
                       child: Text(
                         'Grafik ma\'lumotlari shu yerda bo\'ladi',
@@ -398,27 +394,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  // Pastki navigatsiya paneli
-  Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: Colors.blue,
-      unselectedItemColor: Colors.grey,
-      showUnselectedLabels: true,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Asosiy'),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.calendar_today),
-          label: 'Dars jadvali',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person_outline),
-          label: 'Profil',
-        ),
-      ],
     );
   }
 }

@@ -8,6 +8,8 @@ export 'package:animations/animations.dart';
 export 'package:parents/scr/login/auth_provider.dart';
 export 'package:provider/provider.dart';
 export  'dart:convert';
+export 'package:url_launcher/url_launcher.dart';
+
 
 
 // Navigatsiya va marshrutlar
@@ -24,12 +26,16 @@ export 'package:parents/Widgets/drawer/drawer_page.dart';
 export 'package:parents/library/librarys.dart';
 export 'package:parents/scr/home/navigator.dart';
 export 'package:parents/scr/menu/daily.dart';
-export 'package:parents/scr/menu/grade.dart';
-export 'package:parents/scr/menu/payments.dart';
+export 'package:parents/scr/menu/grade_page.dart';
+export 'package:parents/scr/menu/payments_page.dart';
 export 'package:parents/scr/login/splash_scr.dart';
 export 'package:parents/global/api_global.dart';
 export 'package:parents/model/loginModel.dart';
 export 'package:parents/scr/login/login_service.dart';
+export  '../../../model/LessonsModel.dart';
+export '../../Providers/PaymentsProvider.dart';
+
+
 
 
 // Maxsus Widgetlar

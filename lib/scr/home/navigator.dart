@@ -54,18 +54,18 @@ class _MainScreenState extends State<MainScreen> {
           elevation: 0,
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
+              icon: Icon(Icons.home_outlined,size: 28,),
+              activeIcon: Icon(Icons.home,size: 28,),
               label: 'Asosiy',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_today_outlined),
-              activeIcon: Icon(Icons.calendar_today),
+              icon: Icon(Icons.calendar_month_rounded,size: 28,),
+              activeIcon: Icon(Icons.calendar_month,size: 28,),
               label: 'Dars jadvali',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
+              icon: Icon(Icons.person_outline,size: 28,),
+              activeIcon: Icon(Icons.person,size: 28,),
               label: 'Profil',
             ),
           ],

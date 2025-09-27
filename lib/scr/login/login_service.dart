@@ -13,7 +13,7 @@ class LoginService {
   static Future<Parents?> loginUser(String phone) async {
     try {
       final response = await _dio.post(
-        "${Apiendpoints.login}",
+        Apiendpoints.login,
         data: {"guardianPhoneNumber": phone},
       );
       if (response.statusCode == 200 && response.data['token'] != null) {

@@ -34,13 +34,16 @@ class _ProfileDrawerState extends State<ProfileDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<PaymentsProvider>();
+
     return Drawer(
       child: Container(
         color: const Color(0xFFF0F2F5),
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            _buildDrawerHeader(),
+            _buildDrawerHeader(provider.totalBalance.toString()),
+
             const SizedBox(height: 20),
             _buildMenuGroup(
               context,
@@ -65,18 +68,6 @@ class _ProfileDrawerState extends State<ProfileDrawer> {
                       },
                     ),
                     _buildMenuItem(
-                      icon: Icons.comment_outlined,
-                      title: 'Izohlar',
-                      onTap: () {},
-                    ),
-                    _buildMenuItem(
-                      icon: Icons.calendar_month,
-                      title: 'Kunlik menyular',
-                      onTap: () {
-                        Navigator.pushNamed(context, '/daily');
-                      },
-                    ),
-                    _buildMenuItem(
                       icon: Icons.payment,
                       title: "To'lov",
                       onTap: () {
@@ -86,7 +77,10 @@ class _ProfileDrawerState extends State<ProfileDrawer> {
                     _buildMenuItem(
                       icon: Icons.logout,
                       title: "Chiqish",
-                      onTap: () async {},
+                      onTap: () async {
+                        LoginService.logout();
+                        SystemNavigator.pop();
+                      },
                     ),
                   ],
                 ),
@@ -98,7 +92,7 @@ class _ProfileDrawerState extends State<ProfileDrawer> {
     );
   }
 
-  Widget _buildDrawerHeader() {
+  Widget _buildDrawerHeader(String sum) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
       decoration: const BoxDecoration(
@@ -197,7 +191,7 @@ class _ProfileDrawerState extends State<ProfileDrawer> {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              parents!.guardian.phoneNumber,
+                              "+${parents!.guardian.phoneNumber}",
                               style: const TextStyle(
                                 fontSize: 14,
                                 color: Colors.black54,
@@ -256,9 +250,9 @@ class _ProfileDrawerState extends State<ProfileDrawer> {
                 color: Colors.green.shade50,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Text(
-                "Balans: 800 000 So'm",
-                style: TextStyle(
+              child: Text(
+                "Balans: ${sum.toString()}",
+                style: const TextStyle(
                   fontSize: 15,
                   color: Colors.green,
                   fontWeight: FontWeight.bold,

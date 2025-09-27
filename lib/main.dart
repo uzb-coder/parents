@@ -1,4 +1,6 @@
+import 'Providers/GradesProvider.dart';
 import 'Providers/LessonsProvider.dart';
+import 'Providers/PaymentsProvider.dart';
 import 'library/librarys.dart';
 
 void main() {
@@ -6,7 +8,9 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => TodayLessonsProvider())
+        ChangeNotifierProvider(create: (_) => TodayLessonsProvider()),
+        ChangeNotifierProvider(create: (_) => GradesProvider()),
+        ChangeNotifierProvider(create: (_) => PaymentsProvider())
       ],
       child: const MyApp(),
     ),

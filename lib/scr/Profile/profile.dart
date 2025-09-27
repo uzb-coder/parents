@@ -74,7 +74,7 @@ class _ProfilePageState extends State<ProfilePage> {
       builder: (context) {
         return Container(
           padding: const EdgeInsets.all(16),
-          height: 300,
+          height: 280,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -110,7 +110,6 @@ class _ProfilePageState extends State<ProfilePage> {
                           fontSize: 16,
                         ),
                       ),
-                      subtitle: Text("Sinif: ${child.groupId}"),
                     );
                   },
                 ),
@@ -209,15 +208,8 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
 
             const SizedBox(height: 16),
-
-            // 1-guruh (O'quv yili, Farzand)
             ProfilePage._buildMenuGroup(
               children: [
-                ProfilePage._buildMenuItem(
-                  "O'quv yili",
-                  trailing: "2025-2026",
-                  icon: Icons.calendar_month,
-                ),
                 ProfilePage._buildMenuItem(
                   "Farzand",
                   trailing: firstChild != null ? firstChild.fullName : "Yo'q",
@@ -232,30 +224,24 @@ class _ProfilePageState extends State<ProfilePage> {
                     }
                   },
                 ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            // 2-guruh
-            ProfilePage._buildMenuGroup(
-              children: [
                 ProfilePage._buildMenuItem(
-                  "Avtomatik to'lov",
-                  icon: Icons.credit_card,
-                ),
-                ProfilePage._buildMenuItem(
-                  "Shartnomalar",
-                  icon: Icons.description_outlined,
-                ),
-                ProfilePage._buildMenuItem(
-                  "Kirish-chiqish tarixi",
-                  icon: Icons.fingerprint,
-                ),
-                ProfilePage._buildMenuItem("Ulashish", icon: Icons.share),
-                ProfilePage._buildMenuItem(
-                  "Ilovaga baho bering",
-                  icon: Icons.thumb_up_alt_outlined,
+                  "Ulashish",
+                  icon: Icons.share,
+                  onTap: () async {
+                    final url = Uri.parse(
+                      "https://murodtech.netlify.app",
+                    ); // o'zgartiring
+                    if (await canLaunchUrl(url)) {
+                      await launchUrl(
+                        url,
+                        mode: LaunchMode.externalApplication,
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Sayt ochib bo'lmadi")),
+                      );
+                    }
+                  },
                 ),
               ],
             ),

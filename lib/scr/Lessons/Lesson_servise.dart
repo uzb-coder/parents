@@ -1,11 +1,12 @@
 import 'package:dio/dio.dart';
+import 'package:parents/global/api_global.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../model/LessonsModel.dart';
 
 class TodayLessonsService {
   static final Dio _dio = Dio(
-    BaseOptions(baseUrl: "https://7f661wm9-8030.euw.devtunnels.ms/api"),
+    BaseOptions(baseUrl: ApiGlobal.baseUrl),
   );
 
   // Tokenni olish
@@ -26,8 +27,6 @@ class TodayLessonsService {
         '/parents/today-lessons',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
-      print('API Response Data: ${response.data}');
-
       if (response.statusCode == 200 && response.data != null) {
         return TodayLessonsResponse.fromJson(response.data);
       } else {

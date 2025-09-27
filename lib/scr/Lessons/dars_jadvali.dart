@@ -9,26 +9,135 @@ class DarsJadvaliPage extends StatefulWidget {
 }
 
 class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
-  int selectedIndex = 3;
-  final List<String> days = [
-    "15.09",
-    "16.09",
-    "17.09",
-    "18.09",
-    "19.09",
-    "20.09",
-  ];
-  final List<String> weekDays = ["Dush", "Sesh", "Chor", "Pay", "Jum", "Shan"];
+  int selectedIndex = 0;
+  final ScrollController _scrollController = ScrollController();
+
+  List<String> days = [];
+  List<String> weekDays = [];
+
+  DateTime currentMonth = DateTime.now();
+
+  String? selectedChildId; // tanlangan bola
+
+
+  @override
+  void initState() {
+    super.initState();
+    _generateMonthDays(currentMonth);
+    _setTodayAsSelected();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToSelectedDateInstant();
+    });
+
+    // scroll listener qo‘shish
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 50) {
+        _loadNextMonth();
+      } else if (_scrollController.position.pixels <= 50) {
+        _loadPreviousMonth();
+      }
+    });
+  }
+
+  void _generateMonthDays(DateTime month, {bool prepend = false}) {
+    DateTime start = DateTime(month.year, month.month, 1);
+    DateTime end = DateTime(month.year, month.month + 1, 1);
+
+    int totalDays = end.difference(start).inDays;
+
+    List<String> newDays = List.generate(totalDays, (index) {
+      DateTime date = start.add(Duration(days: index));
+      return "${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}";
+    });
+
+    List<String> newWeekDays = List.generate(totalDays, (index) {
+      DateTime date = start.add(Duration(days: index));
+      const names = ["Dush", "Sesh", "Chor", "Pay", "Jum", "Shan", "Yak"];
+      return names[date.weekday - 1];
+    });
+
+    if (mounted) {
+      setState(() {
+        if (prepend) {
+          days.insertAll(0, newDays);
+          weekDays.insertAll(0, newWeekDays);
+
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _scrollController.jumpTo(
+              _scrollController.offset + (newDays.length * (65.0 + 8.0)),
+            );
+          });
+        } else {
+          days.addAll(newDays);
+          weekDays.addAll(newWeekDays);
+        }
+      });
+    }
+  }
+
+  void _loadNextMonth() {
+    currentMonth = DateTime(currentMonth.year, currentMonth.month + 1, 1);
+    _generateMonthDays(currentMonth);
+  }
+
+  void _loadPreviousMonth() {
+    currentMonth = DateTime(currentMonth.year, currentMonth.month - 1, 1);
+    _generateMonthDays(currentMonth, prepend: true);
+  }
+
+  void _setTodayAsSelected() {
+    DateTime today = DateTime.now();
+    String todayStr =
+        "${today.day.toString().padLeft(2, '0')}.${today.month.toString().padLeft(2, '0')}";
+    selectedIndex = days.indexOf(todayStr);
+  }
+
+  void _scrollToSelectedDateInstant() {
+    Future.delayed(const Duration(milliseconds: 1), () {
+      if (_scrollController.hasClients && selectedIndex >= 0) {
+        const itemWidth = 65.0 + 8.0; // Container width + margin
+        final screenWidth = MediaQuery.of(context).size.width;
+        final arrowButtonWidth = 48.0;
+        final availableWidth = screenWidth - (arrowButtonWidth * 2);
+
+        final targetOffset =
+            (selectedIndex * itemWidth) -
+            (availableWidth / 2) +
+            (itemWidth / 2);
+        final maxScrollExtent = _scrollController.position.maxScrollExtent;
+        final clampedOffset = targetOffset.clamp(0.0, maxScrollExtent);
+
+        // Darhol scroll qilish (animatsiyasiz)
+        _scrollController.jumpTo(clampedOffset);
+      }
+    });
+  }
+
+  // User action uchun animatsiyali scroll
+  void _scrollToSelectedDateAnimated() {
+    if (_scrollController.hasClients && selectedIndex >= 0) {
+      const itemWidth = 65.0 + 8.0;
+      final screenWidth = MediaQuery.of(context).size.width;
+      final arrowButtonWidth = 48.0;
+      final availableWidth = screenWidth - (arrowButtonWidth * 2);
+
+      final targetOffset =
+          (selectedIndex * itemWidth) - (availableWidth / 2) + (itemWidth / 2);
+      final maxScrollExtent = _scrollController.position.maxScrollExtent;
+      final clampedOffset = targetOffset.clamp(0.0, maxScrollExtent);
+
+      // Animatsiya bilan scroll
+      _scrollController.animateTo(
+        clampedOffset,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<TodayLessonsProvider>(
-        context,
-        listen: false,
-      ).loadTodayLessons();
-    });
-
     return Scaffold(
       drawer: const ProfileDrawer(),
       backgroundColor: const Color(0xFFF5F6FA),
@@ -40,7 +149,6 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
           _buildLessonsList(),
         ],
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
@@ -49,16 +157,6 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
       title: const Text("Dars jadvali", style: TextStyle(color: Colors.white)),
       backgroundColor: const Color(0xFF004DA9),
       centerTitle: true,
-      actions: [
-        IconButton(
-          icon: const Icon(
-            Icons.accessibility_new_outlined,
-            color: Colors.white,
-            size: 28,
-          ),
-          onPressed: () => _showBottomSheet(context),
-        ),
-      ],
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
       ),
@@ -73,7 +171,11 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
           IconButton(
             onPressed:
                 selectedIndex > 0
-                    ? () => setState(() => selectedIndex--)
+                    ? () {
+                      setState(() => selectedIndex--);
+                      _loadLessonsForSelectedDate();
+                      _scrollToSelectedDateAnimated(); // Animatsiya bilan
+                    }
                     : null,
             icon: const Icon(Icons.arrow_back_ios, size: 16),
           ),
@@ -81,12 +183,17 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
             child: SizedBox(
               height: 50,
               child: ListView.builder(
+                controller: _scrollController,
                 scrollDirection: Axis.horizontal,
                 itemCount: days.length,
                 itemBuilder: (context, index) {
                   final isSelected = index == selectedIndex;
                   return GestureDetector(
-                    onTap: () => setState(() => selectedIndex = index),
+                    onTap: () {
+                      setState(() => selectedIndex = index);
+                      _loadLessonsForSelectedDate();
+                      _scrollToSelectedDateAnimated(); // Animatsiya bilan
+                    },
                     child: Container(
                       width: 65,
                       margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -134,7 +241,11 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
           IconButton(
             onPressed:
                 selectedIndex < days.length - 1
-                    ? () => setState(() => selectedIndex++)
+                    ? () {
+                      setState(() => selectedIndex++);
+                      _loadLessonsForSelectedDate();
+                      _scrollToSelectedDateAnimated(); // Animatsiya bilan
+                    }
                     : null,
             icon: const Icon(Icons.arrow_forward_ios, size: 16),
           ),
@@ -150,26 +261,40 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
           if (provider.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (provider.todayLessons == null ||
-              provider.todayLessons!.data.isEmpty) {
-            return const Center(child: Text('Bugungi darslar mavjud emas'));
-          }
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            itemCount: provider.todayLessons!.data.length,
-            itemBuilder: (context, index) {
-              final student = provider.todayLessons!.data[index];
-              final students = provider.todayLessons;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+
+          final selectedDate = _parseSelectedDate(days[selectedIndex]);
+          final filteredLessons = _filterLessonsByDate(provider, selectedDate);
+
+          if (filteredLessons.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 6),
-                  ...student.lessons.map(
-                    (lesson) => LessonCard(
-                      student: student.student,
-                      group: student.group,
+                  Icon(Icons.calendar_today, size: 60, color: Colors.grey[300]),
+                  const SizedBox(height: 16),
+                  Text(
+                    "${_formatDate(selectedDate)} sanasida dars qo'yilmagan",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            children:
+                filteredLessons.expand<Widget>((studentData) {
+                  return studentData.lessons.map<Widget>((lesson) {
+                    return LessonCard(
+                      student: studentData.student,
+                      group: studentData.group,
                       lessonNumber: "${lesson.lessonNumber}-dars",
-                      time: "${students?.date.day}-${students?.date.month}-${students?.date.year}",
+                      time: _formatDate(selectedDate),
                       subject: lesson.subject,
                       teacher: lesson.teacher,
                       onTap:
@@ -181,87 +306,47 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
                                       LessonDetailPage(title: lesson.subject),
                             ),
                           ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                ],
-              );
-            },
+                    );
+                  }).toList();
+                }).toList(),
           );
         },
       ),
     );
   }
 
-  BottomNavigationBar _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      currentIndex: 1,
-      onTap: (index) {},
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: "Asosiy"),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.calendar_today),
-          label: "Dars jadvali",
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.chat_bubble_outline),
-          label: "Chatlar",
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person_outline),
-          label: "Profil",
-        ),
-      ],
-    );
+  DateTime _parseSelectedDate(String dayStr) {
+    final parts = dayStr.split('.');
+    final now = DateTime.now();
+    return DateTime(now.year, int.parse(parts[1]), int.parse(parts[0]));
   }
 
-  void _showBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder:
-          (_) => Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  "Boradigan vaqtingizni tanlang",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
-                ...[
-                  "Keldim",
-                  "5 daqiqa",
-                  "10 daqiqa",
-                  "15 daqiqa",
-                  "30 daqiqa",
-                  "30 daqiqadan ko‘p",
-                ].map(
-                  (e) => ListTile(
-                    title: Text(e),
-                    trailing:
-                        e == "10 daqiqa"
-                            ? const Icon(Icons.check, color: Colors.blue)
-                            : null,
-                    onTap: () => Navigator.pop(context),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    minimumSize: const Size(double.infinity, 48),
-                  ),
-                  child: const Text("Yuborish"),
-                ),
-              ],
-            ),
-          ),
-    );
+  String _formatDate(DateTime date) {
+    return "${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}";
+  }
+
+  List<dynamic> _filterLessonsByDate(
+    TodayLessonsProvider provider,
+    DateTime selectedDate,
+  ) {
+    if (provider.todayLessons == null || provider.todayLessons!.data.isEmpty) {
+      return [];
+    }
+
+    return provider.todayLessons!.data.where((studentData) {
+      final lessonDate = provider.todayLessons!.date;
+      return lessonDate.day == selectedDate.day &&
+          lessonDate.month == selectedDate.month &&
+          lessonDate.year == selectedDate.year;
+    }).toList();
+  }
+
+  void _loadLessonsForSelectedDate() {
+    final selectedDate = _parseSelectedDate(days[selectedIndex]);
+    Provider.of<TodayLessonsProvider>(
+      context,
+      listen: false,
+    ).loadTodayLessons(selectedDate);
   }
 }
 
@@ -290,16 +375,16 @@ class LessonCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white24,
+        color: const Color(0xFFF8F9FA),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 6,
-            offset: const Offset(0, 3),
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
-        border: Border.all(color: Colors.blue.withOpacity(0.1)),
+        border: Border.all(color: Colors.grey.withOpacity(0.1), width: 0.5),
       ),
       child: Material(
         color: Colors.transparent,
@@ -311,43 +396,52 @@ class LessonCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header qismi - Farz va vaqt
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
+                        color: const Color(0xFF2196F3),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         lessonNumber,
                         style: const TextStyle(
-                          color: Colors.blue,
+                          color: Colors.white,
                           fontWeight: FontWeight.w600,
-                          fontSize: 14,
+                          fontSize: 13,
                         ),
                       ),
                     ),
                     if (time.isNotEmpty)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(0.1),
+                          color: const Color(0xFF4CAF50),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.schedule, size: 16, color: Colors.green),
+                            const Icon(
+                              Icons.schedule,
+                              size: 14,
+                              color: Colors.white,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               time,
                               style: const TextStyle(
-                                color: Colors.green,
+                                color: Colors.white,
                                 fontWeight: FontWeight.w600,
-                                fontSize: 14,
+                                fontSize: 13,
                               ),
                             ),
                           ],
@@ -355,23 +449,36 @@ class LessonCard extends StatelessWidget {
                       ),
                   ],
                 ),
-                const SizedBox(height: 16),
-
-                // Fan nomi (asosiy ma'lumot)
+                const SizedBox(height: 14),
                 Text(
                   subject,
                   style: const TextStyle(
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: Color(0xFF263238),
                   ),
                 ),
                 const SizedBox(height: 12),
-                _buildInfoRow(Icons.person, "O'quvchi", student, Colors.purple),
+                _buildInfoRow(
+                  Icons.person,
+                  "O'quvchi",
+                  student,
+                  const Color(0xFF9C27B0),
+                ),
                 const SizedBox(height: 8),
-                _buildInfoRow(Icons.school, "O'qituvchi", teacher, Colors.orange),
+                _buildInfoRow(
+                  Icons.school,
+                  "O'qituvchi",
+                  teacher,
+                  const Color(0xFFFF9800),
+                ),
                 const SizedBox(height: 8),
-                _buildInfoRow(Icons.group, "Sinf", group, Colors.teal),
+                _buildInfoRow(
+                  Icons.group,
+                  "Sinf",
+                  group,
+                  const Color(0xFF009688),
+                ),
               ],
             ),
           ),
@@ -395,18 +502,18 @@ class LessonCard extends StatelessWidget {
         Expanded(
           child: RichText(
             text: TextSpan(
-              style: const TextStyle(fontSize: 16, color: Colors.black87),
+              style: const TextStyle(fontSize: 15, color: Color(0xFF424242)),
               children: [
                 TextSpan(
                   text: "$label: ",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    color: color,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w600, color: color),
                 ),
                 TextSpan(
                   text: value,
-                  style: const TextStyle(fontWeight: FontWeight.w400),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xFF263238),
+                  ),
                 ),
               ],
             ),

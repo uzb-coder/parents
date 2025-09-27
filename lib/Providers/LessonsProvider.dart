@@ -7,7 +7,7 @@ class TodayLessonsProvider extends ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
 
-  Future<void> loadTodayLessons() async {
+  Future<void> loadTodayLessons(DateTime selectedDate) async {
     isLoading = true;
     errorMessage = null;
     notifyListeners();

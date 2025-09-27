@@ -10,7 +10,7 @@ class SplashPage extends StatefulWidget {
 class _SplashPageState extends State<SplashPage> {
 
   Future<void> _checkLoginStatus() async {
-    LoginService.clearToken();
+   // LoginService.clearToken();
     await Future.delayed(const Duration(seconds: 2));
 
     bool isLoggedIn = await LoginService.isLoggedIn();

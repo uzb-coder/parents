@@ -105,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
                         controller: _phoneController,
                         keyboardType: TextInputType.phone,
                         decoration: InputDecoration(
-                          hintText: '+998901234567',
+                          hintText: '998901234567',
                           filled: true,
                           fillColor: Colors.white,
                           hintStyle: const TextStyle(color: Colors.grey),

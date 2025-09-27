@@ -15,7 +15,7 @@ class AppRouter {
     AppRoutes.login: (context) => LoginPage(),
     AppRoutes.home: (context) => MainScreen(),
     AppRoutes.payemnts: (context) => Payments(),
-    AppRoutes.grade: (context) => Grade(),
+    AppRoutes.grade: (context) => GradePage(),
     AppRoutes.daily: (context) => DailyPage(),
     AppRoutes.splash: (context) => SplashPage(),
     AppRoutes.profil: (context) => ProfilePage(),
