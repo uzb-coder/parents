@@ -34,6 +34,8 @@ export 'package:parents/model/loginModel.dart';
 export 'package:parents/scr/login/login_service.dart';
 export  '../../../model/LessonsModel.dart';
 export '../../Providers/PaymentsProvider.dart';
+export '../../Providers/LessonsProvider.dart';
+
 
 
 

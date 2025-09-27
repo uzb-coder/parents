@@ -251,55 +251,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  // "Tez kunda" banneri
-  // Widget _buildComingSoonBanner() {
-  //   return Container(
-  //     width: 500,
-  //     height: 80,
-  //     decoration: BoxDecoration(
-  //       borderRadius: BorderRadius.circular(15),
-  //       gradient: const LinearGradient(
-  //         colors: [Colors.orangeAccent, Colors.deepOrangeAccent],
-  //         begin: Alignment.topLeft,
-  //         end: Alignment.bottomRight,
-  //       ),
-  //     ),
-  //     child: Stack(
-  //       alignment: Alignment.center,
-  //       children: [
-  //         // Orqa fondagi raqamlar va matnlar (effekt uchun)
-  //         const Positioned(
-  //           left: 20,
-  //           child: Text(
-  //             '123000',
-  //             style: TextStyle(
-  //               color: Colors.white,
-  //               fontSize: 28,
-  //               fontWeight: FontWeight.bold,
-  //             ),
-  //           ),
-  //         ),
-  //         // Container(
-  //         //   margin: EdgeInsets.only(left: 250),
-  //         //   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-  //         //   decoration: BoxDecoration(
-  //         //     color: Colors.amber,
-  //         //     borderRadius: BorderRadius.circular(20),
-  //         //   ),
-  //         //   child: const Text(
-  //         //     'Tez kunda',
-  //         //     style: TextStyle(
-  //         //       color: Colors.white,
-  //         //       fontWeight: FontWeight.bold,
-  //         //     ),
-  //         //   ),
-  //         // ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
   // Chorak baholari uchun widget
   Widget _buildQuarterlyGrades() {
     return Container(

@@ -1,8 +1,4 @@
-import 'package:dio/dio.dart';
-import 'package:parents/global/api_global.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../model/LessonsModel.dart';
+import 'package:parents/library/librarys.dart';
 
 class TodayLessonsService {
   static final Dio _dio = Dio(

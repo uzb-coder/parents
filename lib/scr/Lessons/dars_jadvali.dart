@@ -1,4 +1,3 @@
-import '../../Providers/LessonsProvider.dart';
 import 'package:parents/library/librarys.dart';
 
 class DarsJadvaliPage extends StatefulWidget {
@@ -11,14 +10,10 @@ class DarsJadvaliPage extends StatefulWidget {
 class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
   int selectedIndex = 0;
   final ScrollController _scrollController = ScrollController();
-
   List<String> days = [];
   List<String> weekDays = [];
-
   DateTime currentMonth = DateTime.now();
-
   String? selectedChildId; // tanlangan bola
-
 
   @override
   void initState() {
@@ -27,9 +22,9 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
     _setTodayAsSelected();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToSelectedDateInstant();
+      _loadLessonsForSelectedDate();
     });
 
-    // scroll listener qo‘shish
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 50) {
@@ -38,6 +33,16 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
         _loadPreviousMonth();
       }
     });
+  }
+
+  void _setTodayAsSelected() {
+    DateTime today = DateTime.now();
+    String todayStr =
+        "${today.day.toString().padLeft(2, '0')}.${today.month.toString().padLeft(2, '0')}";
+    setState(() {
+      selectedIndex = days.indexOf(todayStr);
+    });
+    _loadLessonsForSelectedDate();
   }
 
   void _generateMonthDays(DateTime month, {bool prepend = false}) {
@@ -86,13 +91,6 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
     _generateMonthDays(currentMonth, prepend: true);
   }
 
-  void _setTodayAsSelected() {
-    DateTime today = DateTime.now();
-    String todayStr =
-        "${today.day.toString().padLeft(2, '0')}.${today.month.toString().padLeft(2, '0')}";
-    selectedIndex = days.indexOf(todayStr);
-  }
-
   void _scrollToSelectedDateInstant() {
     Future.delayed(const Duration(milliseconds: 1), () {
       if (_scrollController.hasClients && selectedIndex >= 0) {
@@ -107,8 +105,6 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
             (itemWidth / 2);
         final maxScrollExtent = _scrollController.position.maxScrollExtent;
         final clampedOffset = targetOffset.clamp(0.0, maxScrollExtent);
-
-        // Darhol scroll qilish (animatsiyasiz)
         _scrollController.jumpTo(clampedOffset);
       }
     });
@@ -126,8 +122,6 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
           (selectedIndex * itemWidth) - (availableWidth / 2) + (itemWidth / 2);
       final maxScrollExtent = _scrollController.position.maxScrollExtent;
       final clampedOffset = targetOffset.clamp(0.0, maxScrollExtent);
-
-      // Animatsiya bilan scroll
       _scrollController.animateTo(
         clampedOffset,
         duration: const Duration(milliseconds: 300),

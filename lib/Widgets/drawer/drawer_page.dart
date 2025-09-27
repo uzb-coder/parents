@@ -15,6 +15,9 @@ class _ProfileDrawerState extends State<ProfileDrawer> {
   void initState() {
     super.initState();
     _loadParentsData();
+    Future.microtask(() {
+      Provider.of<PaymentsProvider>(context, listen: false).fetchPayments();
+    });
   }
 
   Future<void> _loadParentsData() async {
