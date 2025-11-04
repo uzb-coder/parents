@@ -9,7 +9,6 @@ class LoginService {
     ),
   );
 
-  // Login qilish
   static Future<Parents?> loginUser(String phone) async {
     try {
       final response = await _dio.post(
@@ -17,7 +16,6 @@ class LoginService {
         data: {"guardianPhoneNumber": phone},
       );
       if (response.statusCode == 200 && response.data['token'] != null) {
-
         Parents parents = Parents.fromJson(response.data);
         await _saveToken(parents.token);
         await _saveParents(parents);
@@ -70,7 +68,7 @@ class LoginService {
   static Future<void> clearToken() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('auth_token');
-    await prefs.remove('parents_data'); // Parents ma'lumotini ham tozalaymiz
+    await prefs.remove('parents_data');
   }
 
   // Login qilinganmi?

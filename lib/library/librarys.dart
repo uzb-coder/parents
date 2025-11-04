@@ -7,10 +7,8 @@ export 'package:shared_preferences/shared_preferences.dart';
 export 'package:animations/animations.dart';
 export 'package:parents/scr/login/auth_provider.dart';
 export 'package:provider/provider.dart';
-export  'dart:convert';
+export 'dart:convert';
 export 'package:url_launcher/url_launcher.dart';
-
-
 
 // Navigatsiya va marshrutlar
 export 'package:go_router/go_router.dart';
@@ -32,13 +30,11 @@ export 'package:parents/scr/login/splash_scr.dart';
 export 'package:parents/global/api_global.dart';
 export 'package:parents/model/loginModel.dart';
 export 'package:parents/scr/login/login_service.dart';
-export  '../../../model/LessonsModel.dart';
+export '../../../model/LessonsModel.dart';
 export '../../Providers/PaymentsProvider.dart';
 export '../../Providers/LessonsProvider.dart';
-
-
-
-
+export 'package:parents/model/StudentProgress%20.dart';
+export 'package:parents/scr/home/home_service.dart';
 
 // Maxsus Widgetlar
 export 'package:parents/Widgets/widgets.dart';

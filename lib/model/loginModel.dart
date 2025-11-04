@@ -60,6 +60,8 @@ class Child {
   }
 
   String get fullName => '$firstName $lastName';
+
+  get guardianPhone => null;
 }
 
 // models/parents.dart

@@ -13,16 +13,17 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
   List<String> days = [];
   List<String> weekDays = [];
   DateTime currentMonth = DateTime.now();
-  String? selectedChildId; // tanlangan bola
+  String? selectedChildId;
 
   @override
   void initState() {
     super.initState();
+
     _generateMonthDays(currentMonth);
-    _setTodayAsSelected();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _setTodayAsSelected();
       _scrollToSelectedDateInstant();
-      _loadLessonsForSelectedDate();
     });
 
     _scrollController.addListener(() {
@@ -39,10 +40,14 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
     DateTime today = DateTime.now();
     String todayStr =
         "${today.day.toString().padLeft(2, '0')}.${today.month.toString().padLeft(2, '0')}";
-    setState(() {
-      selectedIndex = days.indexOf(todayStr);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() {
+        selectedIndex = days.indexOf(todayStr);
+      });
+      _loadLessonsForSelectedDate();
     });
-    _loadLessonsForSelectedDate();
   }
 
   void _generateMonthDays(DateTime month, {bool prepend = false}) {

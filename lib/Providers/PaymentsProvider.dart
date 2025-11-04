@@ -2,7 +2,6 @@ import 'package:parents/library/librarys.dart';
 import '../model/PaymentsModel.dart';
 import '../scr/menu/Service/PaymentsService.dart';
 
-
 class PaymentsProvider with ChangeNotifier {
   PaymentsResponse? _payments;
   bool _isLoading = false;
@@ -24,13 +23,12 @@ class PaymentsProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
   int get totalBalance {
     if (_payments == null) return 0;
     return _payments!.data.fold(
       0,
-          (sum, item) =>
-      sum + (item.summary.remainingDebt ?? 0),
+      (sum, item) => sum + (item.summary.remainingDebt),
     );
   }
-
 }

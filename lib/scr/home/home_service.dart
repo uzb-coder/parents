@@ -1,7 +1,9 @@
 import 'package:parents/library/librarys.dart';
 
-class TodayLessonsService {
+class HomeService {
   static final Dio _dio = Dio(BaseOptions(baseUrl: ApiGlobal.baseUrl));
+
+  static final api = ApiGlobal.baseUrl;
 
   static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -9,7 +11,7 @@ class TodayLessonsService {
     return token;
   }
 
-  static Future<TodayLessonsResponse?> fetchTodayLessons() async {
+  static Future<StudentProgress?> fetchTodayLessons(String studentId) async {
     try {
       final token = await getToken();
       if (token == null) {
@@ -17,12 +19,11 @@ class TodayLessonsService {
       }
 
       final response = await _dio.get(
-        '/parents/today-lessons',
+        '$api/parents/overview/$studentId',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       if (response.statusCode == 200 && response.data != null) {
-        print("sasasas : $response");
-        return TodayLessonsResponse.fromJson(response.data);
+        return StudentProgress.fromJson(response.data);
       } else {
         return null;
       }
