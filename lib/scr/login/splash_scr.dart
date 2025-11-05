@@ -8,9 +8,8 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
-
   Future<void> _checkLoginStatus() async {
-   // LoginService.clearToken();
+    // LoginService.clearToken();
     await Future.delayed(const Duration(seconds: 2));
 
     bool isLoggedIn = await LoginService.isLoggedIn();
@@ -18,15 +17,9 @@ class _SplashPageState extends State<SplashPage> {
     if (!mounted) return;
 
     if (isLoggedIn) {
-      Navigator.pushReplacementNamed(
-        context,
-        '/home',
-      ); // ✅ Agar token bo‘lsa Home sahifaga
+      Navigator.pushReplacementNamed(context, '/home');
     } else {
-      Navigator.pushReplacementNamed(
-        context,
-        '/login',
-      ); // ❌ Token bo‘lmasa Login sahifaga
+      Navigator.pushReplacementNamed(context, '/login');
     }
   }
 
@@ -45,7 +38,7 @@ class _SplashPageState extends State<SplashPage> {
         children: [
           Spacer(),
           Spacer(),
-          Center(child: Image.asset("assets/icon.png", width: width * .7)),
+          Center(child: Image.asset("assets/1.jpg", width: width * .7)),
           Spacer(),
           CircularProgressIndicator(color: Colors.black),
           Spacer(),
