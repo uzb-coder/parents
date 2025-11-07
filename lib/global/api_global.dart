@@ -1,5 +1,5 @@
 class ApiGlobal {
-  static const String baseUrl = 'https://7f661wm9-8030.euw.devtunnels.ms/api';
+  static const String baseUrl = 'https://satalana.richman.uz/api';
 }
 
 class Apiendpoints {

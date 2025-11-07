@@ -14,7 +14,6 @@ class _LoginPageState extends State<LoginPage> {
   bool _loading = false;
   String? _error;
 
-  //Login funksiyasi
   Future<void> _login() async {
     if (mounted) {
       setState(() {
@@ -42,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.pushReplacementNamed(context, AppRoutes.home);
     } else {
       setState(() {
-        _error = "❌ Telefon yoki login xato!";
+        _error = "❌ Telefon xato!";
       });
     }
   }
