@@ -1,5 +1,5 @@
-import 'Providers/GradesProvider.dart';
-import 'library/librarys.dart';
+import 'src/data/Providers/GradesProvider.dart';
+import 'src/library/librarys.dart';
 
 void main() {
   runApp(
