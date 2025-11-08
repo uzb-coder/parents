@@ -10,7 +10,6 @@ class GradeService {
     return prefs.getString('auth_token');
   }
 
-  // Baholarni olish
   static Future<GradesResponse?> fetchGrades(String childId) async {
     try {
       final token = await getToken();

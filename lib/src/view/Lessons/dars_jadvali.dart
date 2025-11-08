@@ -1,5 +1,5 @@
-import 'package:parents/src/library/librarys.dart';
 import 'package:parents/src/data/model/LessonsModel.dart';
+import 'package:parents/src/library/librarys.dart';
 
 class DarsJadvaliPage extends StatefulWidget {
   const DarsJadvaliPage({super.key});
@@ -131,6 +131,10 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FB),
       appBar: AppBar(
+        iconTheme: const IconThemeData(color: Colors.white),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+        ),
         elevation: 0,
         title: const Text(
           "Dars jadvali",
@@ -138,16 +142,6 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
         ),
         backgroundColor: const Color(0xFF004DA9),
         centerTitle: true,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF0066CC), Color(0xFF004DA9)],
-            ),
-          ),
-        ),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
-        ),
       ),
       body: Column(
         children: [
