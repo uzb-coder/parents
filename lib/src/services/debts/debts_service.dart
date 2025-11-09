@@ -1,22 +1,22 @@
-import 'package:parents/src/data/model/grade/gradeModel.dart';
+import 'package:parents/src/data/model/debts/DebtModel.dart';
 import 'package:parents/src/library/librarys.dart';
 
-class GradeService {
+class DebtsService {
   static final Dio _dio = Dio();
 
-  // Tokenni olish
+  // Token olish
   static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('auth_token');
   }
 
-  // Baholarni olish
-  static Future<GradesResponse?> fetchGrades(String childId) async {
+  // ✅ Qarzdorlik ma'lumotlarini olish
+  static Future<DebtResponse?> fetchDebts() async {
     try {
       final token = await getToken();
       if (token == null) return null;
 
-      final url = '${ApiGlobal.baseUrl}/grades/$childId';
+      final url = '${ApiGlobal.baseUrl}/debts';
 
       final response = await _dio.get(
         url,
@@ -24,13 +24,14 @@ class GradeService {
       );
 
       if (response.statusCode == 200 && response.data != null) {
-        return GradesResponse.fromJson(response.data);
+        print(response.data);
+        return DebtResponse.fromJson(response.data);
       } else {
         print('Server returned status: ${response.statusCode}');
         return null;
       }
     } catch (e) {
-      print("Error fetching grades: $e");
+      print("Error fetching debts: $e");
       return null;
     }
   }

@@ -1,4 +1,4 @@
-import 'package:parents/src/data/model/LessonsModel.dart';
+import 'package:parents/src/data/model/lesson/LessonsModel.dart';
 import 'package:parents/src/library/librarys.dart';
 
 class DarsJadvaliPage extends StatefulWidget {

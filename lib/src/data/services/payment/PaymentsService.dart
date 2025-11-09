@@ -1,5 +1,5 @@
 import 'package:parents/src/library/librarys.dart';
-import '../../model/PaymentsModel.dart';
+import '../../model/payment/PaymentsModel.dart';
 
 class PaymentsService {
   static final Dio _dio = Dio();

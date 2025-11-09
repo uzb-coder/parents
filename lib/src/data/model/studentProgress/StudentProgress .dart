@@ -17,12 +17,14 @@ class StudentProgress {
     return StudentProgress(
       student: Student.fromJson(json['student'] ?? {}),
       overallProgress: json['overall_progress'] ?? 0,
-      lastMarks: (json['last_marks'] as List?)
+      lastMarks:
+          (json['last_marks'] as List?)
               ?.map((m) => LastMark.fromJson(m))
               .toList() ??
           [],
       quarterMarks: Map<String, int>.from(json['quarter_marks'] ?? {}),
-      monthlyMarks: (json['monthly_marks'] as List?)
+      monthlyMarks:
+          (json['monthly_marks'] as List?)
               ?.map((m) => MonthlyMark.fromJson(m))
               .toList() ??
           [],
@@ -77,11 +79,7 @@ class LastMark {
   final int mark;
   final String date;
 
-  LastMark({
-    required this.subject,
-    required this.mark,
-    required this.date,
-  });
+  LastMark({required this.subject, required this.mark, required this.date});
 
   factory LastMark.fromJson(Map<String, dynamic> json) {
     return LastMark(
@@ -92,11 +90,7 @@ class LastMark {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'subject': subject,
-      'mark': mark,
-      'date': date,
-    };
+    return {'subject': subject, 'mark': mark, 'date': date};
   }
 
   String get subjectName {
@@ -122,10 +116,7 @@ class MonthlyMark {
   final String month;
   final double average;
 
-  MonthlyMark({
-    required this.month,
-    required this.average,
-  });
+  MonthlyMark({required this.month, required this.average});
 
   factory MonthlyMark.fromJson(Map<String, dynamic> json) {
     return MonthlyMark(
@@ -135,10 +126,7 @@ class MonthlyMark {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'month': month,
-      'average': average,
-    };
+    return {'month': month, 'average': average};
   }
 
   String get monthName {

@@ -1,4 +1,4 @@
-import 'package:parents/src/data/model/GradeModel.dart';
+import 'package:parents/src/data/model/grade/gradeModel.dart';
 import 'package:parents/src/data/services/grade/GradeService.dart';
 import 'package:parents/src/library/librarys.dart';
 

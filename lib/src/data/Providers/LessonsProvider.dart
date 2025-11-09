@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../model/LessonsModel.dart';
+import '../model/lesson/LessonsModel.dart';
 import '../services/lesson/Lesson_servise.dart';
 import 'dart:convert';
 

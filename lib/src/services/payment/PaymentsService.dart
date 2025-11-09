@@ -1,4 +1,4 @@
-import 'package:parents/src/data/model/PaymentsModel.dart';
+import 'package:parents/src/data/model/payment/PaymentsModel.dart';
 import 'package:parents/src/library/librarys.dart';
 
 class PaymentsService {

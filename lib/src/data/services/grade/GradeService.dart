@@ -1,5 +1,5 @@
 import 'package:parents/src/library/librarys.dart';
-import '../../model/GradeModel.dart';
+import '../../model/grade/gradeModel.dart';
 
 class GradeService {
   static final Dio _dio = Dio();

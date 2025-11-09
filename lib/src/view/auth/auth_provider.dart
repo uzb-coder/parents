@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:parents/src/data/model/loginModel.dart';
+import 'package:parents/src/data/model/auth/loginModel.dart';
 import 'package:parents/src/data/services/auth/login_service.dart';
 
 class AuthProvider with ChangeNotifier {

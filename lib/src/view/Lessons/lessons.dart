@@ -1,5 +1,5 @@
 import 'package:parents/src/library/librarys.dart';
-import 'package:parents/src/data/model/LessonsModel.dart';
+import 'package:parents/src/data/model/lesson/LessonsModel.dart';
 
 class LessonDetailPage extends StatelessWidget {
   final Homework homework;

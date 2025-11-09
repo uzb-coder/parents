@@ -1,5 +1,5 @@
 import 'package:parents/src/library/librarys.dart';
-import 'package:parents/src/data/model/LessonsModel.dart';
+import 'package:parents/src/data/model/lesson/LessonsModel.dart';
 
 class TodayLessonsService {
   static final Dio _dio = Dio(BaseOptions(baseUrl: ApiGlobal.baseUrl));
