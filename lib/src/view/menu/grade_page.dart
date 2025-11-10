@@ -9,7 +9,7 @@ class GradePage extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => GradesProvider()..loadGrades(),
       child: Scaffold(
-        drawer: ProfileDrawer(),
+        drawer: const ProfileDrawer(),
         appBar: AppBar(
           backgroundColor: const Color(0xff004da9),
           foregroundColor: Colors.white,
@@ -20,7 +20,7 @@ class GradePage extends StatelessWidget {
               builder: (_, p, __) {
                 return GestureDetector(
                   onTap: () async {
-                    DateTime? picked = await showDatePicker(
+                    final picked = await showDatePicker(
                       context: context,
                       initialDate: p.selectedDate,
                       firstDate: DateTime(2020),
@@ -30,16 +30,9 @@ class GradePage extends StatelessWidget {
                       p.filterByDate(picked);
                     }
                   },
-                  child: Row(
-                    children: [
-                      const SizedBox(width: 6),
-                      const Icon(
-                        Icons.calendar_month,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-                      const SizedBox(width: 25),
-                    ],
+                  child: const Padding(
+                    padding: EdgeInsets.only(right: 16),
+                    child: Icon(Icons.calendar_month, size: 30),
                   ),
                 );
               },
@@ -49,7 +42,6 @@ class GradePage extends StatelessWidget {
             borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
           ),
         ),
-
         body: const SafeArea(child: GradeGrid()),
       ),
     );
@@ -63,82 +55,147 @@ class GradeGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<GradesProvider>(
       builder: (context, provider, child) {
-        if (provider.isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (provider.grades.isEmpty) {
-          return const Center(child: Text("Baholar topilmadi"));
-        }
-
-        return Padding(
-          padding: const EdgeInsets.all(16),
-          child: GridView(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 1.9,
-            ),
-            children:
-                provider.grades.map((lesson) {
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (context) => Fanlar(
-                                title: lesson.subject,
-                                grade: lesson.grade,
-                                lessonNumber: lesson.lessonNumber,
-                                status: lesson.status,
-                                date: lesson.date,
-                              ),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x22000000),
-                            blurRadius: 6,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              lesson.subject,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF0A4C9A),
-                              ),
-                            ),
-                          ),
-                          const Icon(
-                            Icons.menu_book_rounded,
-                            size: 40,
-                            color: Color(0xFF0A4C9A),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
-          ),
+        return RefreshIndicator(
+          onRefresh: provider.refresh, // Pull-to-refresh
+          child: _buildBody(provider),
         );
       },
+    );
+  }
+
+  Widget _buildBody(GradesProvider provider) {
+    // Dastlabki yuklashda shimmer
+    if (provider.isLoading && provider.grades.isEmpty) {
+      return _buildShimmerGrid();
+    }
+
+    if (provider.grades.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.grade, size: 64, color: Colors.amber),
+            const SizedBox(height: 16),
+            Text(
+              "Baho qo‘yilmagan",
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Asosiy grid
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: GridView.builder(
+        physics: const AlwaysScrollableScrollPhysics(), // Refresh uchun zarur
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 1.9,
+        ),
+        itemCount: provider.grades.length,
+        itemBuilder: (context, index) {
+          final lesson = provider.grades[index];
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) => Fanlar(
+                        title: lesson.subject,
+                        grade: lesson.grade,
+                        lessonNumber: lesson.lessonNumber,
+                        status: lesson.status,
+                        date: lesson.date,
+                      ),
+                ),
+              );
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x22000000),
+                    blurRadius: 6,
+                    offset: Offset(0, 3),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      lesson.subject,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF0A4C9A),
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const Icon(
+                    Icons.menu_book_rounded,
+                    size: 40,
+                    color: Color(0xFF0A4C9A),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // Shimmer effekti
+  Widget _buildShimmerGrid() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: GridView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 1.9,
+        ),
+        itemCount: 6,
+        itemBuilder:
+            (_, __) => Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(width: 90, height: 16, color: Colors.white),
+                    Container(width: 40, height: 40, color: Colors.white),
+                  ],
+                ),
+              ),
+            ),
+      ),
     );
   }
 }

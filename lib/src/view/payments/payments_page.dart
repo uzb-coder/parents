@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../data/Providers/PaymentsProvider.dart';
 import '../../utils/drawer/drawer_page.dart';
 
@@ -11,15 +12,22 @@ class Payments extends StatefulWidget {
 }
 
 class _PaymentsState extends State<Payments> {
+  DateTime? selectedDate;
+
   @override
   void initState() {
     super.initState();
     Future.microtask(() {
-      // Ikkala ma'lumotni birga yuklash
       final provider = Provider.of<PaymentsProvider>(context, listen: false);
       provider.fetchPayments();
       provider.fetchDebts();
     });
+  }
+
+  Future<void> _refresh() async {
+    final provider = Provider.of<PaymentsProvider>(context, listen: false);
+    await provider.fetchPayments();
+    await provider.fetchDebts();
   }
 
   @override
@@ -34,6 +42,15 @@ class _PaymentsState extends State<Payments> {
         centerTitle: true,
         title: const Text("To'lovlar"),
         actions: [
+          // Filter tugmasi
+          IconButton(
+            icon: Icon(
+              Icons.calendar_month,
+              color: selectedDate != null ? Colors.amber : Colors.white,
+            ),
+            onPressed: _pickDateFromAppBar,
+          ),
+          // O'quvchi tanlash
           if (provider.payments != null)
             Padding(
               padding: const EdgeInsets.only(right: 12.0),
@@ -58,12 +75,187 @@ class _PaymentsState extends State<Payments> {
             ),
         ],
       ),
-      body:
-          provider.isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : provider.payments == null
-              ? const Center(child: Text("Ma'lumot topilmadi"))
-              : _buildStudentData(provider),
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child:
+            provider.isLoading
+                ? _shimmerLoading()
+                : provider.payments == null
+                ? const Center(child: Text("Ma'lumot topilmadi"))
+                : _buildStudentData(provider),
+      ),
+    );
+  }
+
+  Future<void> _pickDateFromAppBar() async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        int selectedYear = selectedDate?.year ?? DateTime.now().year;
+        int selectedMonth = selectedDate?.month ?? DateTime.now().month;
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text("Oy va yil tanlash"),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Yil tanlash
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back_ios),
+                          onPressed: () {
+                            setState(() => selectedYear--);
+                          },
+                        ),
+                        Text(
+                          selectedYear.toString(),
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.arrow_forward_ios),
+                          onPressed: () {
+                            setState(() => selectedYear++);
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    // Oylar grid
+                    SizedBox(
+                      height: 200,
+                      child: GridView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              childAspectRatio: 2,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                            ),
+                        itemCount: 12,
+                        itemBuilder: (context, index) {
+                          final month = index + 1;
+                          final isSelected = month == selectedMonth;
+                          final monthNames = [
+                            'Yan',
+                            'Fev',
+                            'Mar',
+                            'Apr',
+                            'May',
+                            'Iyun',
+                            'Iyul',
+                            'Avg',
+                            'Sen',
+                            'Okt',
+                            'Noy',
+                            'Dek',
+                          ];
+
+                          return InkWell(
+                            onTap: () {
+                              setState(() => selectedMonth = month);
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color:
+                                    isSelected
+                                        ? const Color(0xFF0A4C9A)
+                                        : Colors.grey.shade200,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  monthNames[index],
+                                  style: TextStyle(
+                                    color:
+                                        isSelected
+                                            ? Colors.white
+                                            : Colors.black,
+                                    fontWeight:
+                                        isSelected
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        this.setState(() => this.selectedDate = null);
+                        Navigator.pop(context);
+                      },
+                      child: const Text("Tozalash"),
+                    ),
+                    // TextButton(
+                    //   onPressed: () => Navigator.pop(context),
+                    //   child: const Text("Bekor qilish"),
+                    // ),
+                    ElevatedButton(
+                      onPressed: () {
+                        this.setState(() {
+                          this.selectedDate = DateTime(
+                            selectedYear,
+                            selectedMonth,
+                          );
+                        });
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0A4C9A),
+                      ),
+                      child: const Text(
+                        "Tanlash",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _shimmerLoading() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: 5,
+      itemBuilder: (context, index) {
+        return Shimmer.fromColors(
+          baseColor: Colors.grey.shade300,
+          highlightColor: Colors.grey.shade100,
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            height: 120,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -71,8 +263,32 @@ class _PaymentsState extends State<Payments> {
     final studentPaymentData = provider.payments!.data[provider.selectedIndex];
     final studentDebtData = provider.selectedStudentDebtData;
 
+    // Sana bo'yicha filterlash (format: "11-2025")
+    final filteredPayments =
+        selectedDate == null
+            ? studentPaymentData.payments
+            : studentPaymentData.payments.where((payment) {
+              try {
+                // payment.month format: "11-2025" -> month-year
+                final parts = payment.month.split('-');
+                if (parts.length == 2) {
+                  final paymentMonth = int.tryParse(parts[0]);
+                  final paymentYear = int.tryParse(parts[1]);
+
+                  if (paymentMonth != null && paymentYear != null) {
+                    return paymentMonth == selectedDate!.month &&
+                        paymentYear == selectedDate!.year;
+                  }
+                }
+                return false;
+              } catch (e) {
+                return false;
+              }
+            }).toList();
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
+      physics: const AlwaysScrollableScrollPhysics(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -201,50 +417,14 @@ class _PaymentsState extends State<Payments> {
             const SizedBox(height: 20),
           ],
 
-          // // To'lovlar kartasi
-          // _Card(
-          //   child: Column(
-          //     crossAxisAlignment: CrossAxisAlignment.start,
-          //     children: [
-          //       Row(
-          //         children: const [
-          //           Icon(
-          //             Icons.account_balance_wallet,
-          //             color: Color(0xFF0A4C9A),
-          //           ),
-          //           SizedBox(width: 8),
-          //           Text(
-          //             "To'langan summalar",
-          //             style: TextStyle(
-          //               fontSize: 16,
-          //               fontWeight: FontWeight.w700,
-          //               color: Color(0xFF0A4C9A),
-          //             ),
-          //           ),
-          //         ],
-          //       ),
-          //       const SizedBox(height: 8),
-          //       Text(
-          //         "${provider.selectedStudentTotalPaid} So'm",
-          //         style: const TextStyle(
-          //           fontSize: 26,
-          //           fontWeight: FontWeight.w800,
-          //           color: Color(0xFF10B981),
-          //         ),
-          //       ),
-          //     ],
-          //   ),
-          // ),
-          //  const SizedBox(height: 20),
-
           // To'lovlar tarixi
           const Text(
             "To'lovlar tarixi",
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 12),
-          if (studentPaymentData.payments.isNotEmpty)
-            ...studentPaymentData.payments.map((payment) {
+          if (filteredPayments.isNotEmpty)
+            ...filteredPayments.map((payment) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -257,17 +437,34 @@ class _PaymentsState extends State<Payments> {
                     time: payment.status,
                     rightMeta: "",
                   ),
-                  //   rightMeta:
-                  //       "Qolgan qarzdorlik: ${studentPaymentData.summary.remainingDebt} So'm",
-                  // ),
                   const SizedBox(height: 12),
                 ],
               );
             }).toList()
           else
-            const Text(
-              "Hali to'lov qilinmagan",
-              style: TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.search_off,
+                      size: 64,
+                      color: Colors.grey.shade400,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      selectedDate == null
+                          ? "Hali to'lov qilinmagan"
+                          : "Tanlangan sana uchun to'lov topilmadi",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
         ],
       ),
@@ -502,26 +699,28 @@ class _TransactionTile extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              const Icon(
-                Icons.info_outline,
-                size: 16,
-                color: Color(0xFF6B7280),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  rightMeta,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF6B7280),
+          if (rightMeta.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                const Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: Color(0xFF6B7280),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    rightMeta,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF6B7280),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ],
       ),
     );

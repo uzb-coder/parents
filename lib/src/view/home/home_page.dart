@@ -1,4 +1,3 @@
-import 'package:shimmer/shimmer.dart';
 import 'package:parents/src/library/librarys.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -14,12 +13,12 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isLoadingParents = true;
   bool isLoadingProgress = true;
   String? error;
+  int selectedChildIndex = 0; // Tanlangan farzand indeksi
 
   @override
   void initState() {
     super.initState();
     _loadParents();
-    _loadProgress();
   }
 
   Future<void> _loadParents() async {
@@ -32,8 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
         parents = savedParents;
         isLoadingParents = false;
       });
-      // Progressni faqat parents yuklangandan keyin yuklaymiz
-      if (isLoadingProgress) _loadProgress();
+      _loadProgress();
     } catch (e) {
       setState(() {
         error = e.toString();
@@ -48,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => isLoadingProgress = true);
 
     try {
-      final studentId = parents!.children[0].id;
+      final studentId = parents!.children[selectedChildIndex].id;
       final fetched = await HomeService.fetchTodayLessons(studentId);
       if (!mounted) return;
       setState(() {
@@ -71,6 +69,244 @@ class _HomeScreenState extends State<HomeScreen> {
     await _loadParents();
   }
 
+  void _showAllMarks() {
+    if (progress?.lastMarks == null || progress!.lastMarks.isEmpty) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder:
+          (context) => Container(
+            height: MediaQuery.of(context).size.height * 0.8,
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
+              ),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(24),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.purple.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              Icons.grade,
+                              color: Colors.purple,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Text(
+                            "Barcha baholar",
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const Spacer(),
+                          IconButton(
+                            onPressed: () => Navigator.pop(context),
+                            icon: const Icon(Icons.close),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: progress!.lastMarks.length,
+                    itemBuilder: (context, index) {
+                      return _buildMarkItem(progress!.lastMarks[index]);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+    );
+  }
+
+  void _showChildSelector() {
+    if (parents == null || parents!.children.length <= 1) return;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder:
+          (context) => Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        "Farzandni tanlang",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: parents!.children.length,
+                  itemBuilder: (context, index) {
+                    final child = parents!.children[index];
+                    final isSelected = selectedChildIndex == index;
+                    final initials =
+                        child.fullName
+                            .split(' ')
+                            .where((s) => s.isNotEmpty)
+                            .map((s) => s[0].toUpperCase())
+                            .take(2)
+                            .join();
+
+                    return InkWell(
+                      onTap: () {
+                        setState(() {
+                          selectedChildIndex = index;
+                        });
+                        Navigator.pop(context);
+                        _loadProgress();
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color:
+                              isSelected
+                                  ? Colors.blue.shade50
+                                  : Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color:
+                                isSelected
+                                    ? Colors.blue.shade300
+                                    : Colors.transparent,
+                            width: 2,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 28,
+                              backgroundColor:
+                                  isSelected
+                                      ? Colors.blue.shade100
+                                      : Colors.grey.shade200,
+                              child: Text(
+                                initials,
+                                style: TextStyle(
+                                  color:
+                                      isSelected
+                                          ? Colors.blue.shade700
+                                          : Colors.grey.shade700,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    child.fullName,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          isSelected
+                                              ? Colors.blue.shade900
+                                              : Colors.black,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    child.groupId,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (isSelected)
+                              Icon(
+                                Icons.check_circle,
+                                color: Colors.blue.shade600,
+                                size: 28,
+                              ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Xato holati
@@ -83,7 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return _buildFullSkeleton();
     }
 
-    final child = parents!.children[0];
+    final child = parents!.children[selectedChildIndex];
     final student = progress?.student;
     final fullName =
         student?.fullName.isNotEmpty == true
@@ -115,7 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   : _buildProgressCard(progress?.overallProgress ?? 0),
               const SizedBox(height: 20),
 
-              // 3. SO'NGGI BAHOLAR
+              // 3. SO'NGGI BAHOLAR (faqat bitta ko'rsatish)
               isLoadingProgress
                   ? _buildSkeletonMarks()
                   : _buildLastMarks(progress?.lastMarks ?? []),
@@ -150,98 +386,134 @@ class _HomeScreenState extends State<HomeScreen> {
             .take(2)
             .join();
 
+    final hasMultipleChildren = parents!.children.length > 1;
+
     return Card(
       elevation: 6,
       shadowColor: Colors.blue.shade100,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Colors.blue.shade500, Colors.blue.shade700],
+      child: InkWell(
+        onTap: hasMultipleChildren ? _showChildSelector : null,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Colors.blue.shade500, Colors.blue.shade700],
+            ),
           ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 3),
-                ),
-                child: CircleAvatar(
-                  radius: 36,
-                  backgroundColor: Colors.white,
-                  child: Text(
-                    initials,
-                    style: TextStyle(
-                      color: Colors.blue.shade700,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 3),
+                  ),
+                  child: CircleAvatar(
+                    radius: 36,
+                    backgroundColor: Colors.white,
+                    child: Text(
+                      initials,
+                      style: TextStyle(
+                        color: Colors.blue.shade700,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.25),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.4),
-                          width: 1.5,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.school,
-                            color: Colors.white,
-                            size: 16,
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.25),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.4),
+                            width: 1.5,
                           ),
-                          const SizedBox(width: 6),
-                          Text(
-                            group,
-                            style: const TextStyle(
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.school,
                               color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
+                              size: 16,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 6),
+                            Text(
+                              group,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Icon(
-                Icons.chevron_right,
-                color: Colors.white.withOpacity(0.8),
-                size: 28,
-              ),
-            ],
+                if (hasMultipleChildren)
+                  Column(
+                    children: [
+                      Icon(
+                        Icons.swap_horiz,
+                        color: Colors.white.withOpacity(0.8),
+                        size: 28,
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          '${selectedChildIndex + 1}/${parents!.children.length}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  Icon(
+                    Icons.chevron_right,
+                    color: Colors.white.withOpacity(0.8),
+                    size: 28,
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -342,15 +614,34 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader(
-          "So'nggi baholar",
-          Icons.calendar_today,
-          Colors.purple,
+        Row(
+          children: [
+            Expanded(
+              child: _buildSectionHeader(
+                "So'nggi baholar",
+                Icons.calendar_today,
+                Colors.purple,
+              ),
+            ),
+            if (marks.isNotEmpty && marks.length > 1)
+              TextButton.icon(
+                onPressed: _showAllMarks,
+                icon: const Icon(Icons.visibility, size: 18),
+                label: const Text("Barchasini ko'rish"),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.purple,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                ),
+              ),
+          ],
         ),
         const SizedBox(height: 12),
         marks.isEmpty
             ? _buildEmptyCard("Hozircha baholar yo'q", Icons.grade)
-            : Column(children: marks.map(_buildMarkItem).toList()),
+            : _buildMarkItem(marks.first), // Faqat birinchi baho
       ],
     );
   }
@@ -370,26 +661,7 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: color.withOpacity(0.3), width: 2),
-                ),
-                child: Center(
-                  child: Text(
-                    '${mark.mark}',
-                    style: TextStyle(
-                      color: color,
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
+              /// ✅ Chap tomonda fan nomi
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -422,22 +694,37 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
+
+              const SizedBox(width: 5),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
+                width: 70,
+                padding: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  color: color.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: color.withOpacity(0.4), width: 2),
                 ),
-                child: Text(
-                  _getMarkLabel(mark.mark),
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '${mark.mark}',
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _getMarkLabel(mark.mark),
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -630,8 +917,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ================== SKELETON WIDGETS ==================
-
   Widget _buildFullSkeleton() {
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -694,26 +979,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSkeletonMarks() {
-    return Column(
-      children: List.generate(
-        3,
-        (_) => Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
-            child: Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Container(
-                height: 80,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-            ),
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          height: 80,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
       ),

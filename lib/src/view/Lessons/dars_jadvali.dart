@@ -228,7 +228,7 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
                         },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
-                          width: 68,
+                          width: 70,
                           margin: const EdgeInsets.symmetric(
                             horizontal: 2,
                             vertical: 2,
@@ -284,16 +284,16 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
                                           : const Color(0xFF1A1A1A),
                                 ),
                               ),
-                              if (isToday && !isSelected)
-                                Container(
-                                  margin: const EdgeInsets.only(top: 2),
-                                  width: 4,
-                                  height: 4,
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFF0066CC),
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
+                              // if (isToday && !isSelected)
+                              //   Container(
+                              //     margin: const EdgeInsets.only(top: 2),
+                              //     width: 4,
+                              //     height: 4,
+                              //     decoration: const BoxDecoration(
+                              //       color: Color(0xFF0066CC),
+                              //       shape: BoxShape.circle,
+                              //     ),
+                              //   ),
                             ],
                           ),
                         ),
@@ -367,37 +367,58 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
     return Expanded(
       child: Consumer<TodayLessonsProvider>(
         builder: (context, provider, _) {
-          if (provider.isLoading) {
-            // 🔹 Shimmer Loading
-            return ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              itemCount: 5, // nechta shimmer card ko'rsatiladi
-              itemBuilder: (context, index) {
-                return Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    height: 120,
-                  ),
-                );
-              },
-            );
-          }
+          return RefreshIndicator(
+            onRefresh: () async {
+              // Tanlangan sanaga asoslangan darslarni qayta yuklash
+              _loadLessonsForSelectedDate();
+              // Shu yerda provider isLoading ni tekshirishingiz mumkin
+              await Future.delayed(const Duration(milliseconds: 500));
+            },
+            child:
+                provider.isLoading
+                    ? ListView.builder(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      itemCount: 5,
+                      itemBuilder: (context, index) {
+                        return Shimmer.fromColors(
+                          baseColor: Colors.grey[300]!,
+                          highlightColor: Colors.grey[100]!,
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 16),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            height: 120,
+                          ),
+                        );
+                      },
+                    )
+                    : _lessonsListView(provider),
+          );
+        },
+      ),
+    );
+  }
 
-          final selectedDate =
-              selectedIndex >= 0 && selectedIndex < fullDates.length
-                  ? fullDates[selectedIndex]
-                  : DateTime.now();
-          final filtered = _filterLessonsByDate(provider, selectedDate);
+  Widget _lessonsListView(TodayLessonsProvider provider) {
+    final selectedDate =
+        selectedIndex >= 0 && selectedIndex < fullDates.length
+            ? fullDates[selectedIndex]
+            : DateTime.now();
+    final filtered = _filterLessonsByDate(provider, selectedDate);
 
-          if (filtered.isEmpty) {
-            return Center(
+    if (filtered.isEmpty) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(
+            height: 300,
+            child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -408,7 +429,7 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    "Bu kuni vazifa yo‘q",
+                    "Bu kuni dars yo‘q",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
@@ -422,38 +443,38 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
                   ),
                 ],
               ),
-            );
-          }
+            ),
+          ),
+        ],
+      );
+    }
 
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            itemCount: filtered.length,
-            itemBuilder: (context, index) {
-              final h = filtered[index];
-              final s = provider.todayLessons!.student;
-              return LessonCard(
-                student: "${s.firstName} ${s.lastName}".trim(),
-                group: s.group,
-                lessonNumber: "${h.lesson.lessonNumber}-dars",
-                dayOfWeek: _formatDay(h.lesson.day),
-                time: _formatTime(h.assignedDate),
-                subject: h.subject,
-                teacher: h.teacher,
-                title: h.title,
-                description: h.description,
-                index: index,
-                onTap:
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => LessonDetailPage(homework: h),
-                      ),
-                    ),
-              );
-            },
-          );
-        },
-      ),
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      itemCount: filtered.length,
+      itemBuilder: (context, index) {
+        final h = filtered[index];
+        final s = provider.todayLessons!.student;
+        return LessonCard(
+          student: "${s.firstName} ${s.lastName}".trim(),
+          group: s.group,
+          lessonNumber: "${h.lesson.lessonNumber}-dars",
+          dayOfWeek: _formatDay(h.lesson.day),
+          time: _formatTime(h.assignedDate),
+          subject: h.subject,
+          teacher: h.teacher,
+          title: h.title,
+          description: h.description,
+          index: index,
+          onTap:
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => LessonDetailPage(homework: h),
+                ),
+              ),
+        );
+      },
     );
   }
 
