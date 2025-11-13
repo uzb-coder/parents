@@ -314,7 +314,6 @@ class _HomeScreenState extends State<HomeScreen> {
       return _buildErrorScreen();
     }
 
-    // Parents yuklanayotgan bo'lsa
     if (isLoadingParents || parents == null) {
       return _buildFullSkeleton();
     }
@@ -520,8 +519,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildProgressCard(int value) {
+  Widget _buildProgressCard(double value) {
     final percent = (value / 100).clamp(0.0, 1.0);
+    final displayValue = value.round();
     return Card(
       elevation: 4,
       shadowColor: Colors.green.shade100,
@@ -592,7 +592,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 animation: true,
                 percent: percent,
                 center: Text(
-                  "$value%",
+                  "$displayValue%",
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -619,7 +619,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: _buildSectionHeader(
                 "So'nggi baholar",
-                Icons.calendar_today,
+                Icons.view_comfy_sharp,
                 Colors.purple,
               ),
             ),
@@ -734,7 +734,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildQuarterlyGrades(Map<String, int> quarters) {
+  Widget _buildQuarterlyGrades(Map<String, double> quarters) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -757,7 +757,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ['1', '2', '3', '4']
                       .map(
                         (q) =>
-                            _buildQuarterBadge("$q-chorak", quarters[q] ?? 0),
+                            _buildQuarterBadge("$q-chorak", quarters[q] ?? 0.0),
                       )
                       .toList(),
             ),
@@ -767,8 +767,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildQuarterBadge(String label, int grade) {
-    final color = grade > 0 ? _getMarkColor(grade) : Colors.grey;
+  Widget _buildQuarterBadge(String label, double grade) {
+    final display = grade > 0 ? grade.toStringAsFixed(1) : '-';
+    final color = grade > 0 ? _getMarkColor(grade.round()) : Colors.grey;
     return Column(
       children: [
         Container(
@@ -788,10 +789,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           child: Center(
             child: Text(
-              grade > 0 ? '$grade' : '-',
+              display,
               style: TextStyle(
                 color: color,
-                fontSize: 26,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
             ),

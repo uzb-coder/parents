@@ -10,16 +10,15 @@ class TodayLessonsService {
     return token;
   }
 
-  static Future<HomeworkResponse?> fetchTodayLessons(String studentId) async {
+  static Future<HomeworkResponse?> fetchTodayLessons() async {
     try {
       final token = await getToken();
       if (token == null) return null;
 
       final response = await _dio.get(
-        '/parents/children/homework/$studentId',
+        '/today-lessons',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
-
       if (response.statusCode == 200 && response.data != null) {
         return HomeworkResponse.fromJson(response.data);
       } else {

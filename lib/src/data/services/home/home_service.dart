@@ -22,6 +22,7 @@ class HomeService {
         '$api/parents/overview/$studentId',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
+      print("Natija : $response");
       if (response.statusCode == 200 && response.data != null) {
         return StudentProgress.fromJson(response.data);
       } else {

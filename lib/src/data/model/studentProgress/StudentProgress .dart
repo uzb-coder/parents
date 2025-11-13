@@ -1,12 +1,12 @@
 class StudentProgress {
-  final Student student;
-  final int overallProgress;
+  final Student? student;
+  final double overallProgress; // int emas!
   final List<LastMark> lastMarks;
-  final Map<String, int> quarterMarks;
+  final Map<String, double> quarterMarks; // int emas!
   final List<MonthlyMark> monthlyMarks;
 
   StudentProgress({
-    required this.student,
+    this.student,
     required this.overallProgress,
     required this.lastMarks,
     required this.quarterMarks,
@@ -15,30 +15,25 @@ class StudentProgress {
 
   factory StudentProgress.fromJson(Map<String, dynamic> json) {
     return StudentProgress(
-      student: Student.fromJson(json['student'] ?? {}),
-      overallProgress: json['overall_progress'] ?? 0,
+      student:
+          json['student'] != null ? Student.fromJson(json['student']) : null,
+      overallProgress: (json['overall_progress'] as num?)?.toDouble() ?? 0.0,
       lastMarks:
           (json['last_marks'] as List?)
               ?.map((m) => LastMark.fromJson(m))
               .toList() ??
           [],
-      quarterMarks: Map<String, int>.from(json['quarter_marks'] ?? {}),
+      quarterMarks:
+          (json['quarter_marks'] as Map<String, dynamic>?)?.map(
+            (k, v) => MapEntry(k, (v as num).toDouble()),
+          ) ??
+          {},
       monthlyMarks:
           (json['monthly_marks'] as List?)
               ?.map((m) => MonthlyMark.fromJson(m))
               .toList() ??
           [],
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'student': student.toJson(),
-      'overall_progress': overallProgress,
-      'last_marks': lastMarks.map((m) => m.toJson()).toList(),
-      'quarter_marks': quarterMarks,
-      'monthly_marks': monthlyMarks.map((m) => m.toJson()).toList(),
-    };
   }
 }
 

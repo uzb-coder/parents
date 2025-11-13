@@ -48,7 +48,7 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
 
   void _generateMonthDays(DateTime month, {bool prepend = false}) {
     final start = DateTime(month.year, month.month, 1);
-    final end = DateTime(month.year, month.month + 1, 0); // oxirgi kun
+    final end = DateTime(month.year, month.month + 1, 0);
     final totalDays = end.day;
 
     final newDays = List.generate(totalDays, (i) {
@@ -129,6 +129,7 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: ProfileDrawer(),
       backgroundColor: const Color(0xFFF5F7FB),
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
@@ -192,9 +193,7 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
               ),
             ],
           ),
-
           const SizedBox(height: 8),
-
           Row(
             children: [
               _arrowButton(Icons.arrow_back_ios_rounded, selectedIndex > 0, () {
@@ -204,7 +203,6 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
                   _scrollToSelectedDateAnimated();
                 }
               }),
-
               Expanded(
                 child: SizedBox(
                   height: 50,
@@ -284,16 +282,6 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
                                           : const Color(0xFF1A1A1A),
                                 ),
                               ),
-                              // if (isToday && !isSelected)
-                              //   Container(
-                              //     margin: const EdgeInsets.only(top: 2),
-                              //     width: 4,
-                              //     height: 4,
-                              //     decoration: const BoxDecoration(
-                              //       color: Color(0xFF0066CC),
-                              //       shape: BoxShape.circle,
-                              //     ),
-                              //   ),
                             ],
                           ),
                         ),
@@ -302,7 +290,6 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
                   ),
                 ),
               ),
-
               _arrowButton(
                 Icons.arrow_forward_ios_rounded,
                 selectedIndex < days.length - 1,
@@ -369,9 +356,7 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
         builder: (context, provider, _) {
           return RefreshIndicator(
             onRefresh: () async {
-              // Tanlangan sanaga asoslangan darslarni qayta yuklash
               _loadLessonsForSelectedDate();
-              // Shu yerda provider isLoading ni tekshirishingiz mumkin
               await Future.delayed(const Duration(milliseconds: 500));
             },
             child:
@@ -410,102 +395,155 @@ class _DarsJadvaliPageState extends State<DarsJadvaliPage> {
         selectedIndex >= 0 && selectedIndex < fullDates.length
             ? fullDates[selectedIndex]
             : DateTime.now();
-    final filtered = _filterLessonsByDate(provider, selectedDate);
 
-    if (filtered.isEmpty) {
-      return ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          SizedBox(
-            height: 300,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.event_busy_rounded,
-                    size: 64,
-                    color: Colors.grey[400],
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    "Bu kuni dars yo‘q",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _formatDate(selectedDate),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFF004DA9),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      );
+    // HomeworkResponse ni tekshirish
+    if (provider.todayLessons == null || provider.todayLessons!.data.isEmpty) {
+      return _buildEmptyState(selectedDate);
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: filtered.length,
-      itemBuilder: (context, index) {
-        final h = filtered[index];
-        final s = provider.todayLessons!.student;
-        return LessonCard(
-          student: "${s.firstName} ${s.lastName}".trim(),
-          group: s.group,
-          lessonNumber: "${h.lesson.lessonNumber}-dars",
-          dayOfWeek: _formatDay(h.lesson.day),
-          time: _formatTime(h.assignedDate),
-          subject: h.subject,
-          teacher: h.teacher,
-          title: h.title,
-          description: h.description,
-          index: index,
-          onTap:
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => LessonDetailPage(homework: h),
-                ),
+    // API dan kelgan date ni parse qilish
+    final apiDate = DateTime.parse(provider.todayLessons!.date);
+
+    // Tanlangan sana API date bilan bir xilmi tekshirish
+    final isSameDate =
+        selectedDate.year == apiDate.year &&
+        selectedDate.month == apiDate.month &&
+        selectedDate.day == apiDate.day;
+
+    // Agar tanlangan sana API date bilan mos kelmasa, bo'sh holat ko'rsatish
+    if (!isSameDate) {
+      return _buildEmptyState(selectedDate);
+    }
+
+    // Barcha studentlar va ularning darslarini yig'ish
+    List<Widget> allCards = [];
+
+    for (var studentData in provider.todayLessons!.data) {
+      for (var lesson in studentData.lessons) {
+        // Agar homework bo'lsa
+        if (lesson.homeworks.isNotEmpty) {
+          // Har bir homework uchun card
+          for (int i = 0; i < lesson.homeworks.length; i++) {
+            allCards.add(
+              LessonCard(
+                student: studentData.student,
+                group: studentData.group,
+                lessonNumber: "${lesson.lessonNumber}-dars",
+                dayOfWeek: _getWeekDayFromDate(selectedDate),
+                time: _formatTime(lesson.homeworks[i].assignedDate),
+                subject: lesson.subject,
+                teacher: lesson.teacher,
+                title: lesson.homeworks[i].title,
+                description: lesson.homeworks[i].description,
+                index: allCards.length,
+                onTap:
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (_) =>
+                                LessonDetailPage(homework: lesson.homeworks[i]),
+                      ),
+                    ),
               ),
-        );
-      },
+            );
+          }
+        } else {
+          // Homework bo'lmasa ham darsni ko'rsatish
+          allCards.add(
+            LessonCard(
+              student: studentData.student,
+              group: studentData.group,
+              lessonNumber: "${lesson.lessonNumber}-dars",
+              dayOfWeek: _getWeekDayFromDate(selectedDate),
+              time: _formatDate(selectedDate),
+              subject: lesson.subject,
+              teacher: lesson.teacher,
+              title: "Uyga vazifa yo'q",
+              description: "Bu dars uchun uyga vazifa berilmagan",
+              index: allCards.length,
+              onTap: () {}, // Bo'sh vazifa uchun hech narsa qilmaymiz
+            ),
+          );
+        }
+      }
+    }
+
+    if (allCards.isEmpty) {
+      return _buildEmptyState(selectedDate);
+    }
+
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: allCards,
     );
   }
 
-  String _formatDay(String day) {
-    const map = {
-      "dushanba": "Dush",
-      "seshanba": "Sesh",
-      "chorshanba": "Chor",
-      "payshanba": "Pay",
-      "juma": "Jum",
-      "shanba": "Shan",
-      "yakshanba": "Yak",
-    };
-    return map[day.toLowerCase()] ?? day;
+  Widget _buildEmptyState(DateTime selectedDate) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        SizedBox(
+          height: 300,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.event_busy_rounded,
+                  size: 64,
+                  color: Colors.grey[400],
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  "Bu kuni dars yo'q",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _formatDate(selectedDate),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF004DA9),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _getWeekDayFromDate(DateTime date) {
+    const names = ["Dush", "Sesh", "Chor", "Pay", "Jum", "Shan", "Yak"];
+    return names[date.weekday - 1];
   }
 
   String _formatTime(DateTime d) =>
-      "${d.day} Noyabr, ${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}";
+      "${d.day} ${_getMonthName(d.month)}, ${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}";
+
   String _formatDate(DateTime d) =>
       "${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}";
 
-  List<Homework> _filterLessonsByDate(TodayLessonsProvider p, DateTime d) {
-    if (p.todayLessons == null) return [];
-    return p.todayLessons!.homeworks
-        .where(
-          (h) =>
-              h.assignedDate.year == d.year &&
-              h.assignedDate.month == d.month &&
-              h.assignedDate.day == d.day,
-        )
-        .toList();
+  String _getMonthName(int month) {
+    const months = [
+      "Yanvar",
+      "Fevral",
+      "Mart",
+      "Aprel",
+      "May",
+      "Iyun",
+      "Iyul",
+      "Avgust",
+      "Sentabr",
+      "Oktabr",
+      "Noyabr",
+      "Dekabr",
+    ];
+    return months[month - 1];
   }
 
   void _loadLessonsForSelectedDate() {
@@ -622,13 +660,28 @@ class LessonCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 _row(Icons.book_rounded, "Fan", subject, c[0]),
-                _row(Icons.person_rounded, "O‘qituvchi", teacher, c[1]),
+                _row(Icons.person_rounded, "O'qituvchi", teacher, c[1]),
                 _row(
                   Icons.face_rounded,
-                  "O‘quvchi",
+                  "O'quvchi",
                   student,
                   const Color(0xFF6366F1),
                 ),
+                _row(
+                  Icons.groups_rounded,
+                  "Guruh",
+                  group,
+                  const Color(0xFF10B981),
+                ),
+                if (title.isNotEmpty && title != "Uyga vazifa yo'q") ...[
+                  const Divider(height: 16),
+                  _row(
+                    Icons.assignment_rounded,
+                    "Vazifa",
+                    title,
+                    const Color(0xFFEC4899),
+                  ),
+                ],
               ],
             ),
           ),
@@ -652,7 +705,14 @@ class LessonCard extends StatelessWidget {
               fontSize: 14,
             ),
           ),
-          Expanded(child: Text(value, style: const TextStyle(fontSize: 14))),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 14),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
     );

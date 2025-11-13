@@ -1,55 +1,92 @@
-class Student {
-  final String id;
-  final String firstName;
-  final String lastName;
-  final String group;
+class HomeworkResponse {
+  final String message;
+  final String date;
+  final List<StudentData> data;
 
-  Student({
-    required this.id,
-    required this.firstName,
-    required this.lastName,
-    required this.group,
+  HomeworkResponse({
+    required this.message,
+    required this.date,
+    required this.data,
   });
 
-  factory Student.fromJson(Map<String, dynamic> json) {
-    return Student(
-      id: json['id'],
-      firstName: json['firstName'],
-      lastName: json['lastName'],
-      group: json['group'],
+  factory HomeworkResponse.fromJson(Map<String, dynamic> json) {
+    return HomeworkResponse(
+      message: json['message'],
+      date: json['date'],
+      data: (json['data'] as List)
+          .map((e) => StudentData.fromJson(e))
+          .toList(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'firstName': firstName,
-      'lastName': lastName,
+      'message': message,
+      'date': date,
+      'data': data.map((e) => e.toJson()).toList(),
+    };
+  }
+}
+
+class StudentData {
+  final String student;
+  final String group;
+  final List<Lesson> lessons;
+
+  StudentData({
+    required this.student,
+    required this.group,
+    required this.lessons,
+  });
+
+  factory StudentData.fromJson(Map<String, dynamic> json) {
+    return StudentData(
+      student: json['student'],
+      group: json['group'],
+      lessons:
+          (json['lessons'] as List).map((e) => Lesson.fromJson(e)).toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'student': student,
       'group': group,
+      'lessons': lessons.map((e) => e.toJson()).toList(),
     };
   }
 }
 
 class Lesson {
-  final String day;
+  final String subject;
   final int lessonNumber;
+  final String teacher;
+  final List<Homework> homeworks;
 
   Lesson({
-    required this.day,
+    required this.subject,
     required this.lessonNumber,
+    required this.teacher,
+    required this.homeworks,
   });
 
   factory Lesson.fromJson(Map<String, dynamic> json) {
     return Lesson(
-      day: json['day'],
+      subject: json['subject'],
       lessonNumber: json['lessonNumber'],
+      teacher: json['teacher'],
+      homeworks: (json['homeworks'] as List)
+          .map((e) => Homework.fromJson(e))
+          .toList(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'day': day,
+      'subject': subject,
       'lessonNumber': lessonNumber,
+      'teacher': teacher,
+      'homeworks': homeworks.map((e) => e.toJson()).toList(),
     };
   }
 }
@@ -60,7 +97,6 @@ class Homework {
   final String description;
   final String subject;
   final String teacher;
-  final Lesson lesson;
   final DateTime assignedDate;
 
   Homework({
@@ -69,7 +105,6 @@ class Homework {
     required this.description,
     required this.subject,
     required this.teacher,
-    required this.lesson,
     required this.assignedDate,
   });
 
@@ -80,7 +115,6 @@ class Homework {
       description: json['description'],
       subject: json['subject'],
       teacher: json['teacher'],
-      lesson: Lesson.fromJson(json['lesson']),
       assignedDate: DateTime.parse(json['assignedDate']),
     );
   }
@@ -92,42 +126,7 @@ class Homework {
       'description': description,
       'subject': subject,
       'teacher': teacher,
-      'lesson': lesson.toJson(),
       'assignedDate': assignedDate.toIso8601String(),
-    };
-  }
-}
-
-class HomeworkResponse {
-  final String message;
-  final Student student;
-  final int totalHomeworks;
-  final List<Homework> homeworks;
-
-  HomeworkResponse({
-    required this.message,
-    required this.student,
-    required this.totalHomeworks,
-    required this.homeworks,
-  });
-
-  factory HomeworkResponse.fromJson(Map<String, dynamic> json) {
-    return HomeworkResponse(
-      message: json['message'],
-      student: Student.fromJson(json['student']),
-      totalHomeworks: json['totalHomeworks'],
-      homeworks: (json['homeworks'] as List)
-          .map((e) => Homework.fromJson(e))
-          .toList(),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'message': message,
-      'student': student.toJson(),
-      'totalHomeworks': totalHomeworks,
-      'homeworks': homeworks.map((e) => e.toJson()).toList(),
     };
   }
 }
